@@ -27,7 +27,7 @@ struct myInt {
 AVLTree<myInt> mySet, myLeft, myRight;
 set<int> stlSet;
 
-const int N = 10000000;
+const int N = 1000000;
 int t[N];
 
 clock_t start_time;

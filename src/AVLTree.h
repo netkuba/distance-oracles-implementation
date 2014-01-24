@@ -180,13 +180,14 @@ template <class _Value>
 AVLTreeNode<_Value>*
 AVLTreeNode<_Value>::restore(NodePtr &root) {
     merge_height();
-    if (get_balance() > 1) {
+    int balance = get_balance();
+    if (balance > 1) {
         NodePtr y = (NodePtr)right;
         if (y->get_balance() == -1) {
           y->rotate_right(root);  
         }
         return rotate_left(root);
-    } else if (get_balance() < -1) {
+    } else if (balance < -1) {
         NodePtr y = (NodePtr)left;
         if (y->get_balance() == 1) {
             y->rotate_left(root);
@@ -305,13 +306,11 @@ AVLTreeNode<_Value>::find(_Value &new_value) {
 template <class _Value>
 void
 AVLTreeNode<_Value>::erase(NodePtr &root) {
-    NodePtr node = this, son = NULL;
+    NodePtr node = this, son = NULL, old_node = NULL;
     if (node->right == NULL) {
         son = node->left;
     } else {
-        NodePtr new_node = node->get_next();
-        node->value = new_node->value;
-        node = new_node;
+        node = node->get_next();
         son = node->right;
     }
 
@@ -328,13 +327,30 @@ AVLTreeNode<_Value>::erase(NodePtr &root) {
     } else {
         root = son;
     }
-    
+   
+    if (node != this) {
+        node->left = left;
+        if (node->left != NULL) node->left->parent = node;
+        node->right = right;
+        if (node->right != NULL) node->right->parent = node;
+        node->parent = parent;
+        if (node->parent != NULL) {
+            if (node->parent->left == this) {
+                node->parent->left = node;
+            } else {
+                node->parent->right = node;
+            }
+        } else {
+            root = node;
+        }
+    }
+
     NodePtr path = node->parent;
     while (path != NULL) {
         path = path->restore(root)->parent;
     }
 
-    delete node;
+    delete this;
 }
 
 template <class _Value>
