@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <algorithm>
 #include <iostream>
+#include <cassert>
 
 using std::max;
 using std::pair;
@@ -71,6 +72,8 @@ public:
     //! Updates node values on a path to a tree root */
     /*! Assumes that the order of values doesn't change */
     void update();
+    //! Clears node pointers
+    void clear_ptrs();
 
     //! Insert a value into a subtree
     /*! Returns a pointer to the new node. The new node is inserted before vertices of equal value */
@@ -90,6 +93,17 @@ public:
 
     friend class AVLTree<_Value>;
     friend class AVLTreeIterator<_Value>;
+
+    
+    void assert_check() const {
+        assert((left == NULL) || 
+                (left->parent == this));
+        assert((right == NULL) || 
+                (right->parent == this));
+        assert((parent == NULL) || 
+                (parent->left == this) || 
+                (parent->right == this));
+    }
 };
 
 template <class _Value>
@@ -148,6 +162,9 @@ AVLTreeNode<_Value>::rotate_left(NodePtr &root) {
     merge_children();
     y->merge_children();
 
+    assert_check();
+    y->assert_check();
+    
     return y;
 }
 
@@ -181,6 +198,9 @@ AVLTreeNode<_Value>::rotate_right(NodePtr &root) {
     merge_children();
     y->merge_children();
     
+    assert_check();
+    y->assert_check();
+
     return y;
 }
 
@@ -215,6 +235,14 @@ AVLTreeNode<_Value>::update() {
         node->merge_children();
         node = node->parent;
     }
+}
+
+template <class _Value>
+void
+AVLTreeNode<_Value>::clear_ptrs() {
+    left = NULL;
+    right = NULL;
+    parent = NULL;
 }
 
 template <class _Value>
@@ -446,19 +474,27 @@ AVLTreeNode<_Value>::merge(NodePtr lNode, NodePtr rNode) {
 template <class _Value>
 void
 AVLTreeNode<_Value>::split(NodePtr& lNode, NodePtr& rNode) {
-    lNode = left;
+    lNode = left; 
+    if (lNode) lNode->parent = NULL;
     rNode = right;
+    if (rNode) rNode->parent = NULL;
     
-    NodePtr node = this, p = node->parent;
+    NodePtr node = this, p = node->parent, son;
     while (p != NULL) {
         if (p->left == node) {
             node = p;
             p = node->parent;
-            rNode = node->merge(rNode, node->right);
+            son = node->right;
+            node->clear_ptrs();
+            if (son) son->parent = NULL;
+            rNode = node->merge(rNode, son);
         } else {
             node = p;
             p = node->parent;
-            lNode = node->merge(node->left, lNode);
+            son = node->left;
+            node->clear_ptrs();
+            if (son) son->parent = NULL;
+            lNode = node->merge(son, lNode);
         }
     }
 
@@ -476,18 +512,26 @@ template <class _Value>
 void
 AVLTreeNode<_Value>::split_erase(NodePtr& lNode, NodePtr& rNode) {
     lNode = left;
+    if (lNode) lNode->parent = NULL;
     rNode = right;
+    if (rNode) rNode->parent = NULL;
     
-    NodePtr node = this, p = node->parent;
+    NodePtr node = this, p = node->parent, son;
     while (p != NULL) {
         if (p->left == node) {
             node = p;
             p = node->parent;
-            rNode = node->merge(rNode, node->right);
+            son = node->right;
+            node->clear_ptrs();
+            if (son) son->parent = NULL;
+            rNode = node->merge(rNode, son);
         } else {
             node = p;
             p = node->parent;
-            lNode = node->merge(node->left, lNode);
+            son = node->left;
+            node->clear_ptrs();
+            if (son) son->parent = NULL;
+            lNode = node->merge(son, lNode);
         }
     }
 }
@@ -534,7 +578,13 @@ public:
     friend AVLTree<_Value>;
     friend ostream &operator<< (ostream &stream, const AVLTreeIterator &iter) {
         stream << iter.ptr->value;
+/*
+        stream << " (" << iter.ptr 
+            << "," << iter.ptr->left 
+            << "," << iter.ptr->right
+            << "," << iter.ptr->parent << ")";
         return stream;
+*/
     }
 };
 
@@ -576,7 +626,9 @@ public:
 
     template <typename _VValue> 
     friend ostream &operator<< (ostream &stream, const AVLTree<_VValue> &tree);
-    
+   
+    //! Check whether a tree is empty
+    bool empty() const;
     //! Find a vertex with equal value
     /*! Returns end iterator if such a vertex doesn't exist */
     iterator find(_Value value) const;
@@ -622,6 +674,7 @@ AVLTree<_Value>::erase(_Value value) {
 template <typename _Value>
 void
 AVLTree<_Value>::merge(AVLTree<_Value>& right) {
+    if (right.empty()) return;
     iterator it = right.begin();
     it.ptr->erase(right.root);
     root = it.ptr->merge(root, right.root);
@@ -664,6 +717,12 @@ ostream &operator<<(ostream &stream, const AVLTree<_Value> &tree) {
     }
     stream << "]";
     return stream;
+}
+
+template <typename _Value>
+bool
+AVLTree<_Value>::empty() const {
+    return root == NULL;
 }
 
 template <typename _Value>
