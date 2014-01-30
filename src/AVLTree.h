@@ -9,6 +9,8 @@ using std::max;
 using std::pair;
 using std::make_pair;
 using std::ostream;
+using std::endl;
+using std::cout;
 
 template <class _Value>
 class AVLTree;
@@ -66,10 +68,13 @@ public:
     //! Restore an AVL property
     /*! Returns a root of a new subtree */
     NodePtr restore(NodePtr &root);
+    //! Updates node values on a path to a tree root */
+    /*! Assumes that the order of values doesn't change */
+    void update();
 
     //! Insert a value into a subtree
-    /*! Returns a pointer to the new node */
-    NodePtr insert(_Value &value, NodePtr &root);
+    /*! Returns a pointer to the new node. The new node is inserted before vertices of equal value */
+    NodePtr insert(NodePtr node, NodePtr &root);
     //! Finds a node with a given value
     NodePtr find(_Value &value);
     //! Removes vertex from the tree
@@ -77,8 +82,11 @@ public:
     //! Merge two trees with a middle vertex
     /*! It requires left tree, a node and a right tree to be adeqately ordered */
     NodePtr merge(NodePtr left, NodePtr right);
-    //! Split two trees with a middle vertex
+    //! Split into two trees
+    /*! This node become leftmost node of a right tree */
     void split(NodePtr& left, NodePtr& right);    
+    //! Split into two trees by erasing a middle vertex
+    void split_erase(NodePtr& left, NodePtr& right);
 
     friend class AVLTree<_Value>;
     friend class AVLTreeIterator<_Value>;
@@ -201,6 +209,16 @@ AVLTreeNode<_Value>::restore(NodePtr &root) {
 
 template <class _Value>
 void
+AVLTreeNode<_Value>::update() {
+    NodePtr node = this;
+    while (node != NULL) {
+        node->merge_children();
+        node = node->parent;
+    }
+}
+
+template <class _Value>
+void
 AVLTreeNode<_Value>::merge_children() {
     if (left != NULL) {
         if (right != NULL) {
@@ -265,20 +283,22 @@ AVLTreeNode<_Value>::get_root() {
 
 template <class _Value>
 AVLTreeNode<_Value>*
-AVLTreeNode<_Value>::insert(_Value &new_value, NodePtr &root) {
+AVLTreeNode<_Value>::insert(NodePtr node, NodePtr &root) {
     NodePtr result = NULL;
 
-    if (value < new_value) {
+    if (value < node->value) {
         if (right != NULL) {
-            result =  right->insert(new_value, root);
+            result = right->insert(node, root);
         } else {
-            result = right = new AVLTreeNode<_Value>(new_value, this);
+            result = right = node;
+            node->parent = this;
         }
     } else {
         if (left != NULL) {
-            result = left->insert(new_value, root);
+            result = left->insert(node, root);
         } else {
-            result = left = new AVLTreeNode<_Value>(new_value, this);
+            result = left = node;
+            node->parent = this;
         }
     }
     restore(root);
@@ -349,8 +369,6 @@ AVLTreeNode<_Value>::erase(NodePtr &root) {
     while (path != NULL) {
         path = path->restore(root)->parent;
     }
-
-    delete this;
 }
 
 template <class _Value>
@@ -443,6 +461,35 @@ AVLTreeNode<_Value>::split(NodePtr& lNode, NodePtr& rNode) {
             lNode = node->merge(node->left, lNode);
         }
     }
+
+    parent = NULL;
+    left = NULL;
+    right = NULL;
+    if (rNode) {
+        rNode->insert(this, rNode);
+    } else {
+        rNode = this;
+    }
+}
+
+template <class _Value>
+void
+AVLTreeNode<_Value>::split_erase(NodePtr& lNode, NodePtr& rNode) {
+    lNode = left;
+    rNode = right;
+    
+    NodePtr node = this, p = node->parent;
+    while (p != NULL) {
+        if (p->left == node) {
+            node = p;
+            p = node->parent;
+            rNode = node->merge(rNode, node->right);
+        } else {
+            node = p;
+            p = node->parent;
+            lNode = node->merge(node->left, lNode);
+        }
+    }
 }
 
 //! Iteratof of the AVLTree
@@ -453,10 +500,10 @@ private:
     typedef AVLTreeNode<_Value>* NodePtr;
     //! Value of the iterator
     NodePtr ptr;
-    AVLTreeIterator(const NodePtr &ptr) : ptr(ptr) {}
+    AVLTreeIterator(const NodePtr &pptr) : ptr(pptr) {}
 public:
-    AVLTreeIterator(const AVLTreeIterator &it) : ptr(it.ptr) {};
-    AVLTreeIterator() : ptr(NULL) {};
+    AVLTreeIterator(const AVLTreeIterator &it) : ptr(it.ptr) {}
+    AVLTreeIterator() : ptr(NULL) {}
     AVLTreeIterator& operator++() {
         ptr = ptr->get_next();
         return *this;
@@ -467,12 +514,20 @@ public:
     bool operator!=(const AVLTreeIterator& it) const {
         return ptr != it.ptr;
     }
-    _Value& operator*() {
+    bool operator<(const AVLTreeIterator& it) const {
+        return ptr < it.ptr;
+    }
+    _Value& operator*() const {
         return ptr->value;
     }
 
-    /*! Returns an iterator of a root of a tree */
-    AVLTreeIterator<_Value> get_root() {
+    //! Update values on a path to the root of a tree
+    /*! Assumes that the order of values doesn't change */
+    void update() const {
+        ptr->update();
+    }
+    //! Returns an iterator of a root of a tree
+    AVLTreeIterator<_Value> get_root() const {
         return AVLTreeIterator(ptr->get_root());
     }
 
@@ -499,7 +554,8 @@ public:
     
     AVLTree() : root(NULL) {}
     //! Inserts a value
-    void insert(_Value value);
+    /*! The new value is inserted in front of all equal ones */
+    iterator insert(_Value value);
     //! Removes a node pointed by a iterator
     void erase(iterator it);
     //! Removes a node with a given value
@@ -507,8 +563,15 @@ public:
     bool erase(_Value value);
     //! Merges two trees by inserting a new value between them
     /*! This tree, the new value and the second tree should be ordered adequately */
-    void merge(_Value value, AVLTree& right);
+    iterator merge_insert(_Value value, AVLTree& right);
+    //! Merges two trees
+    /*! This tree and the second tree should be ordered adequately */
+    void merge(AVLTree& right);
 
+    //! Split into two trees by removing a vertex
+    void split_erase(iterator it, AVLTree& left, AVLTree& right);
+    //! Split into two trees
+    /*! Specified vertex become a leftmost vertex of a right tree */
     void split(iterator it, AVLTree& left, AVLTree& right);
 
     template <typename _VValue> 
@@ -526,19 +589,22 @@ public:
 };
 
 template <typename _Value>
-void
+AVLTreeIterator<_Value>
 AVLTree<_Value>::insert(_Value value) {
+    NodePtr ptr = new AVLTreeNode<_Value>(value, NULL);
     if (root == NULL) {
-        root = new AVLTreeNode<_Value>(value, NULL);
+        root = ptr;
     } else {
-        root->insert(value, root);
+        root->insert(ptr, root);
     }
+    return iterator(ptr);
 }
 
 template <typename _Value>
 void
 AVLTree<_Value>::erase(iterator it) {
     it.ptr->erase(root);
+    delete it.ptr;
     return;
 }
 
@@ -555,9 +621,28 @@ AVLTree<_Value>::erase(_Value value) {
 
 template <typename _Value>
 void
-AVLTree<_Value>::merge(_Value value, AVLTree<_Value>& right) {
-    root = (new AVLTreeNode<_Value>(value, NULL))->merge(root, right.root);
+AVLTree<_Value>::merge(AVLTree<_Value>& right) {
+    iterator it = right.begin();
+    it.ptr->erase(right.root);
+    root = it.ptr->merge(root, right.root);
     right.root = NULL;
+}
+
+template <typename _Value>
+AVLTreeIterator<_Value>
+AVLTree<_Value>::merge_insert(_Value value, AVLTree<_Value>& right) {
+    NodePtr ptr = new AVLTreeNode<_Value>(value, NULL);
+    root = ptr->merge(root, right.root);
+    right.root = NULL;
+    return iterator(ptr);
+}
+
+template <typename _Value>
+void
+AVLTree<_Value>::split_erase(iterator it, AVLTree<_Value>& left, AVLTree<_Value>& right) {
+    it.ptr->split_erase(left.root, right.root);
+    delete it.ptr;
+    root = NULL;
 }
 
 template <typename _Value>

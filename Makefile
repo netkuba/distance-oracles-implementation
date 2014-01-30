@@ -1,7 +1,7 @@
-all: test_ merge_
+all: test rotate
 
-test_: src/test.cpp src/AVLTree.h
+test: src/test.cpp src/AVLTree.h src/ETTree.h
 	g++ src/test.cpp -o test -std=c++11 -ggdb
 
-merge_: src/merge.cpp src/AVLTree.h
-	g++ src/merge.cpp -o merge -std=c++11 -ggdb
+rotate: src/rotate.cpp src/AVLTree.h
+	g++ src/rotate.cpp -o rotate -std=c++11 -ggdb
