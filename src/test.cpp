@@ -208,7 +208,7 @@ int main() {
         printf("New tree: %d\n", forest.merge(a, b, u, v));
     }
 */
-    
+ 
     const int n = 20;
     ETForest<myValue, myMergerList> forest(n);
     for (int i=0; i<n; ++i) {
