@@ -50,16 +50,16 @@ constructPlanarGraph(
     typedef unsigned int uint;
 
     for (uint i=0; i<vVal.size(); ++i) {
-        result.vertices.push_back(Vertex(vVal[i]));
+        result.vs().push_back(Vertex(vVal[i]));
     }
-    result.edges.reserve(eVal.size());
+    result.es().reserve(eVal.size());
     for (uint i=0; i<eVal.size(); ++i) {
-        result.edges.push_back(Edge(
+        result.es().push_back(Edge(
             eVal[i], 
-            &result.vertices[e[i].first],
-            &result.vertices[e[i].second]
+            &result.vs()[e[i].first],
+            &result.vs()[e[i].second]
         ));
-        add_edge(e[i].first, e[i].second, &result.edges.back(), g);
+        add_edge(e[i].first, e[i].second, &result.es().back(), g);
     }
 
     embedding_storage_t embedding_storage(num_vertices(g));
@@ -75,10 +75,12 @@ constructPlanarGraph(
         int v = get(vertex_index, g)[*vi];
 
         for (auto it = embedding[*vi].begin(); it != embedding[*vi].end(); ++it) {
-           result.vertices[v].edges.push_back(get(ptr_t(), g)[*it]);
+           result.vs()[v].edges.push_back(get(ptr_t(), g)[*it]);
         }
 
     }
+
+    result.updateIndices();
     return result;
 }
 
