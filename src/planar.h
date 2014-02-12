@@ -3,18 +3,24 @@
 
 #include <vector>
 #include <utility>
+#include <limits>
 
 using std::vector;
 
+typedef double W;
+const W infinity = std::numeric_limits<W>::infinity();
+
 class PlanarGraph {
-public:    
+public:
     struct Edge {
-        Edge(int uu, int vv) : 
-            ind(-1), u(uu), v(vv) {}
+        Edge(int uu, int vv, W ww) : 
+            ind(-1), u(uu), v(vv), w(ww) {}
+        Edge(int uu, int vv) : Edge(uu, vv, infinity) {}
 
         int ind;
         int u, v;
         int uNext, vNext;
+        W w;
     };
 
     struct Vertex {
@@ -38,10 +44,10 @@ public:
     vector<Edge>& es() {
         return edges;
     }
-
-    int add_edge(int u, int v) {
+    
+    int add_edge(int u, int v, W w = infinity) {
         int res = es().size();
-        es().push_back(Edge(u, v));
+        es().push_back(Edge(u, v, w));
         vs()[u].edges.push_back(res);
         vs()[v].edges.push_back(res);
         return res;
