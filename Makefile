@@ -1,10 +1,11 @@
-all: boost_wrapper.o test rotate graph_test planar_test
+ALL= boost_wrapper.o test rotate graph_test planar_test oracle.o
+CXXFLAGS= -std=c++11 -O2 -Wall -pg
 
-CXXFLAGS= -std=c++11 -ggdb -Wall
+all: $(ALL)
 
 src/ETTree.h: src/AVLTree.h
 
-test: src/test.cpp src/ETTree.h
+test: src/test.cpp src/ETTree.h graph.o
 	g++ src/test.cpp graph.o -o test $(CXXFLAGS)
 
 rotate: src/rotate.cpp src/AVLTree.h
@@ -23,11 +24,14 @@ boost_wrapper.o: src/boost_wrapper.cpp src/boost_wrapper.h src/graph.h
 planar.o: src/planar.cpp src/planar.h
 	g++ src/planar.cpp -c $(CXXFLAGS)
 
-oracle_internal.o: src/oracle_internal.cpp src/oracle_internal.h
+oracle_internal.o: src/oracle_internal.cpp src/oracle_internal.h src/planar.h
 	g++ src/oracle_internal.cpp -c $(CXXFLAGS)
 
-planar_test: src/planar_test.cpp planar.o oracle_internal.o
-	g++ src/planar_test.cpp planar.o oracle_internal.o -o planar_test $(CXXFLAGS)
+oracle.o: src/oracle.cpp src/oracle.h src/oracle_internal.h
+	g++ src/oracle.cpp -c $(CXXFLAGS)
+
+planar_test: src/planar_test.cpp planar.o oracle_internal.o oracle.o
+	g++ src/planar_test.cpp planar.o oracle_internal.o oracle.o -o planar_test $(CXXFLAGS)
 
 clean:
-	rm -f test rotate graph_test boost_wrapper.o
+	rm -f $(ALL)

@@ -23,4 +23,10 @@ subdivide(
         vector< vector<int> >& parents,
         vector< vector< pair<int, int > > >& paths);
 
+void
+getDistances(
+        PlanarGraph g,
+        int u,
+        vector<W> &distances);
+
 #endif

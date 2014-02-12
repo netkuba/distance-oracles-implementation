@@ -12,6 +12,34 @@ using std::greater;
 using std::max;
 
 void
+getDistances(
+        PlanarGraph g,
+        int u,
+        vector<W> &dist) {
+    
+    dist = vector<W>(g.vs().size(), infinity);
+    typedef pair<W, int> QEl;
+    priority_queue< QEl, vector<QEl>, greater<QEl> > queue;
+   
+    dist[0] = 0;
+    queue.push(make_pair(0, 0));
+    while (!queue.empty()) {
+        QEl curr = queue.top(); queue.pop();
+        int u = curr.second;
+        W d = curr.first;
+        if (d != dist[u]) continue;
+        for (int e: g.vs()[u].edges) {
+            int v = g.opp(u, e);
+            if (dist[v] > d + g.es()[e].w) {
+                dist[v] = d + g.es()[e].w;
+                queue.push(make_pair(dist[v], v));
+            }
+        }
+    }
+
+}
+
+void
 getAlphaFamily(
         PlanarGraph& g, 
         double alpha, 
@@ -65,7 +93,11 @@ getAlphaFamily(
         for (int i=0; i<(int)layer.size(); ++i) {
             if (la <= layer[i] && layer[i] <= lb) {
                 vInd[i] = subg.vs().size();
-                mapping.push_back(i);
+                if (layer[i] == l) {
+                    mapping.push_back(i);
+                } else {
+                    mapping.push_back(-1);
+                }
                 subg.vs().push_back(Vertex());
             }
         }
@@ -173,7 +205,7 @@ subdivide(
     x[0] = 0;
     xe[0] = g.vs()[0].edges[0];
 
-    printEmbedded(g);
+//    printEmbedded(g);
 
     bool stop = false;   
     while (!stop) {
@@ -184,8 +216,6 @@ subdivide(
         x[2] = g.opp(x[1], xe[1]);
         xe[2] = g.eNext(x[2], xe[1]);
         assert(x[0] == g.opp(x[2], xe[2]));
-
-        printf("Trying %d %d %d\n", x[0], x[1], x[2]);
 
         for (int i=0; i<3; ++i) {
             int a = x[i], b = x[(i+1)%3];
@@ -201,11 +231,6 @@ subdivide(
                 assert(false);
             }
             if (n <= 0) n += (g.vs().size()-1) * 2;
-
-            for (int i=0; i<eNum[e].size(); ++i) {
-                printf("- %d %d\n", eNum[e][i].first, eNum[e][i].second);
-            }
-            printf("Got %d : (%d %d)\n", n, a, b);
             if (n > (g.vs().size()-1) * 4 / 3) {
                 stop = false;
                 xe[0] = xe[i];
@@ -214,21 +239,21 @@ subdivide(
             }
         }
     }
-
+/*
     for (int i=1; i<(int)g.vs().size(); ++i) {
         printf("%d <- %d\n", i, g.opp(i, parent[i]));
     }
-
+*/
     for (int i=0; i<3; ++i) {
         vector< pair< int, int > > path;
         int v = x[i];
         while (v != 0) {
             path.push_back(make_pair(v, parent[v]));
-            printf("%d ", v);
+//            printf("%d ", v);
             v = g.opp(v, parent[v]);
         }
         path.push_back(make_pair(0, -1));
-        printf("0\n");
+//        printf("0\n");
         paths.push_back(path);
     }
 }

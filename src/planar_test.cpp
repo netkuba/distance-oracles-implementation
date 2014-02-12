@@ -1,5 +1,5 @@
 #include "planar.h"
-#include "oracle_internal.h"
+#include "oracle.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -18,35 +18,55 @@ void printEmbedded(PlanarGraph& pg) {
     return;
 }
 
-const int n = 10;
+const int n = 100;
 const int m = 5;
 
 int main() {
-    PlanarGraph pg(n*n);
-    
+    vector< pair< int, int > > edge;
+    vector< W > weight;
 
     for (int i=0; i<n-1; ++i)
-        for (int j=0; j<n; ++j)
-            pg.add_edge(i*n+j, (i+1)*n+j, rand()%m);
+        for (int j=0; j<n; ++j) {
+            edge.push_back(make_pair(i*n+j, (i+1)*n+j));
+            weight.push_back(rand()%m+1);
+        }
 
     for (int i=0; i<n; ++i)
-        for (int j=0; j<n-1; ++j)
-            pg.add_edge(i*n+j, i*n+j+1, rand()%m);
+        for (int j=0; j<n-1; ++j) {
+            edge.push_back(make_pair(i*n+j, i*n+j+1));
+            weight.push_back(rand()%m+1);
+        }
 
-    embed(pg);
-    printEmbedded(pg);
+    PlanarOracle oracle(n*n, edge, weight, 5);
 
-    vector< PlanarGraph > resPG, rresPG;
-    vector< vector<int> > resMappings, rresMappings;
-    vector< vector<int> > resParents, rresParents;
-    vector< vector< pair< int, int > > > paths;
-
-    getAlphaFamily(pg, m*n*2, resPG, resMappings, resParents);
-    for (int i=0; i<(int)resPG.size(); ++i) {
-        subdivide(resPG[i], resParents[i], rresPG, rresMappings, rresParents, paths);  
+    for (int i=0; i<(int)oracle.pieces.size(); ++i) {
+        PlanarGraph& pg = oracle.pieces[i].first;
+        vector<int>& mapping = oracle.pieces[i].second;
+        vector<int>& portal = oracle.portals[i];
+/*
+        embed(pg);
+        printf("Piece %d\n", i);
+        printEmbedded(pg);
+        printf("\n");
+        printf("Mapping:\n");
+        for (auto v: mapping) {
+            printf("%d ", v);
+        }
+        printf("\n");
+        printf("Portals:\n");
+        for (auto v: portal) {
+            printf("%d ", v);
+        }
+        printf("\n");
+        printf("\n");*/
     }
-
-    
-
+/*
+    for (int i=0; i<(int)oracle.graph.vs().size(); ++i) {
+        printf("Clusters %d (%d): \n", i, (int)oracle.clusters[i].size());
+        for (auto c: oracle.clusters[i]) {
+            printf("%d - %d\n", c.first, c.second);
+        }
+    }
+*/
     return 0;
 }
