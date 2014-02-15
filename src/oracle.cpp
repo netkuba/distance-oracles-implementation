@@ -1,9 +1,11 @@
 #include "oracle.h"
 
+#include <algorithm>
 #include <utility>
 using std::min;
 using std::max;
 using std::make_pair;
+using std::sort;
 
 PlanarOracle::PlanarOracle(
         int n,
@@ -71,7 +73,22 @@ PlanarOracle::PlanarOracle(
             
             subdivide(pg, parents[i], tmpSubgs, tmpMappings, 
                     tmpParents, tmpPaths);
+/*
+            printf("Robie %d (%d)\n", i, pg.es().size());
+            for (int j=0; j<pg.es().size(); ++j) {
+                printf("%lf ", pg.es()[j].w);
+            }
+            printf("\n");
 
+            for (int j=0; j<(int)tmpPaths.size(); ++j) {
+                auto v = tmpPaths[j];
+                for (auto u: v) {
+                    printf("%d (%lf) ", u.first, pg.es()[u.second].w);
+                }
+                printf("\n");
+            }
+            printf("\n");
+*/
             for (int j=0; j<(int)tmpSubgs.size(); ++j) {
                 for (int k=0; k<(int)tmpMappings[j].size(); ++k) {
                     if (tmpMappings[j][k] == -1) continue;
@@ -87,12 +104,22 @@ PlanarOracle::PlanarOracle(
                 for (auto v: tmpPaths[j]) {
                     if (dist > alpha*eps/4) {
                         prePortals.back().push_back(prevV.first);
-                        dist = prevV.second;
+                        dist = pg.es()[prevV.second].w;
                     }
-                    dist += v.second;
+                    dist += pg.es()[v.second].w;
                     prevV = v;
                 }
             }
+/*
+            printf("Dostaje\n");
+            for (auto v: prePortals.back()) {
+                printf("%d ", v);
+            }
+            printf("\n");
+*/
+            sort(prePortals.back().begin(), prePortals.back().end());
+            auto it = unique(prePortals.back().begin(), prePortals.back().end());
+            prePortals.back().resize(std::distance(prePortals.back().begin(), it));
         }
     }
 
@@ -118,7 +145,6 @@ PlanarOracle::PlanarOracle(
 
 W PlanarOracle::distance_to_vertex(int v, int u) {
     W res = infinity;
-    printf("%d - %d\n", vertex_to_portal[v].size(), graph.vs().size()); 
     for (auto vp: vertex_to_portal[v]) {
         int pp = portals[vp.first].p;
         int vv = portals[vp.first].v;

@@ -11,15 +11,15 @@ void printEmbedded(PlanarGraph& pg) {
         if (pg.vs()[v].edges.empty()) continue;
         int e_end = pg.vs()[v].edges[0], e = e_end;
         do {
-            printf("%d - %d\n", pg.es()[e].u, pg.es()[e].v);
+            printf("%d - %d  (%.1lf)\n", pg.es()[e].u, pg.es()[e].v, pg.es()[e].w);
             e = pg.eNext(v, e);
         } while (e != e_end);
     }
     return;
 }
 
-const int n = 20;
-const int m = 100;
+const int n = 100;
+const int m = 1000;
 const W eps = 0.5;
 
 const int t = 1000;
@@ -42,51 +42,46 @@ int main() {
 
     PlanarOracle oracle(n*n, edge, weight, eps);
 
-    printf("\n\n ==== ===== ==== \n\n");
+    printf("PYTAM! %d\n", oracle.pieces.size());
 /*
-    int u = 6, v = 10;
-    for (int i=0; i<oracle.pieces.size(); ++i) {
-        vector<int> mapping = oracle.pieces[i].second;
-        bool oku = false, okv = false;
-        for (int j=0; j<mapping.size(); ++j) {
-            if (mapping[j] == u) oku = true;
-            if (mapping[j] == v) okv = true;
-        }
-        if (!oku || !okv) continue;
-
-        embed(oracle.pieces[i].first);
-        printEmbedded(oracle.pieces[i].first);
-
-        printf("Portals\n");
-        for (int j=0; j<oracle.portals.size(); ++j) {
-            if (oracle.portals[j].p == i) {
-                printf("%d ", oracle.portals[j].v);
-            }
-        }
+    for (int j=0; j<oracle.pieces.size(); ++j) {
+        printf("Graf %d\n", j);
+        auto pg = oracle.pieces[j].first;
+        auto mapping = oracle.pieces[j].second;
+        auto portals = oracle.portals;
+        embed(pg);
+        printEmbedded(pg);
+        for (int i=0; i<mapping.size(); ++i) printf("%d ", mapping[i]);
         printf("\n");
-
-        printf("Mapping\n");
-        for (int j=0; j<mapping.size(); ++j) {
-            printf("%d ", mapping[j]);
-        }
+        for (int i=0; i<portals.size(); ++i) if (portals[i].p == j) printf("%d ", portals[i].v);
         printf("\n\n");
     }
-
-    printf("%d!\n", oracle.pieces.size());
+    printf("Portals!\n");
+    auto portals = oracle.portals;
+    for (int i=0; i<portals.size(); ++i) printf("%d %d!\n", portals[i].p, portals[i].v);
 */
+    int sum = 0;
+    for (int i=0; i<(int)oracle.portals.size(); ++i) {
+        sum += oracle.portals[i].to_vertex.size();
+    }
+
+    printf("%d / %d = %d\n", sum, n*n, sum / (n*n));
+
     for (int tt=0; tt<t; ++tt) {
         int u = rand()%(n*n), v = rand()%(n*n);
         if (u == v) continue;
         W exact = oracle.exact_to_vertex(u, v);
         W approx = oracle.distance_to_vertex(u, v);
-        printf("%.4lf - %.4lf\n", exact, approx);
+        if (approx != exact) {
+            printf("%.4lf - %.4lf\n", exact, approx);
+        }
         if (approx < exact) {
             printf("%d - %d\n", u, v);
             assert(approx >= exact);
         }
         if (approx > exact * (1 + eps)) {
             printf("%d - %d\n", u, v); 
-            assert(approx <= exact * (1 + eps*2));
+            assert(approx <= exact * (1 + eps));
         }
     }
     return 0;
