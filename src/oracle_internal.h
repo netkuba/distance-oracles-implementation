@@ -18,7 +18,7 @@ void
 subdivide(
         PlanarGraph g,
         vector<int> parent,
-        vector< PlanarGraph >& subs,
+        vector< PlanarGraph >& subgs,
         vector< vector<int> >& mappings,
         vector< vector<int> >& parents,
         vector< vector< pair<int, int > > >& paths);

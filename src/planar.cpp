@@ -91,23 +91,49 @@ void embed(PlanarGraph& pg) {
     return;
 }
 
+static void printEmbedded(PlanarGraph& pg) {
+    for (int v=0; v<(int)pg.vs().size(); ++v) {
+        printf("Vertex %d:\n", v);
+        if (pg.vs()[v].edges.empty()) continue;
+        int e_end = pg.vs()[v].edges[0], e = e_end;
+        do {
+            printf("%d - %d\n", pg.es()[e].u, pg.es()[e].v);
+            e = pg.eNext(v, e);
+        } while (e != e_end);
+    }
+    return;
+}
+
+static void printBoost(graph_t& g) {
+    graph_traits<graph_t>::edge_iterator ei, ei_end;
+    for(tie(ei, ei_end) = edges(g); ei != ei_end; ++ei) {
+        printf("%d - %d\n", source(*ei, g), target(*ei, g));
+    }
+}
+
 void triangulate(PlanarGraph& pg) {
     graph_t g(pg.vs().size());
+    for (int i=0; i<(int)pg.es().size(); ++i) {
+        add_edge(pg.es()[i].u, pg.es()[i].v, i, g); 
+    }
+    
     embedding_storage_t embedding_storage(num_vertices(g));
     embedding_t embedding(embedding_storage.begin(), get(vertex_index, g));
-
-    pgToEm(pg, g, embedding);
     
-    make_biconnected_planar(g, embedding);
-    boyer_myrvold_planarity_test(boyer_myrvold_params::graph = g,
+    assert(boyer_myrvold_planarity_test(boyer_myrvold_params::graph = g,
             boyer_myrvold_params::embedding = embedding
-            );
-    fillEdges(pg, g);
+            ));
 
-    make_maximal_planar(g, embedding);
-    boyer_myrvold_planarity_test(boyer_myrvold_params::graph = g,
+    make_biconnected_planar(g, embedding);
+    assert(boyer_myrvold_planarity_test(boyer_myrvold_params::graph = g,
             boyer_myrvold_params::embedding = embedding
-            );
+            ));
+    fillEdges(pg, g);
+    
+    make_maximal_planar(g, embedding);
+    assert(boyer_myrvold_planarity_test(boyer_myrvold_params::graph = g,
+            boyer_myrvold_params::embedding = embedding
+            ));
     fillEdges(pg, g);
 
     emToPg(g, embedding, pg);

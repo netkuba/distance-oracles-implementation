@@ -1,5 +1,6 @@
 ALL= boost_wrapper.o test rotate graph_test planar_test oracle.o
-CXXFLAGS= -std=c++11 -O2 -Wall -pg
+CXXFLAGS= -std=c++11 -O3
+#CXXFLAGS= -std=c++11 -Wall -ggdb
 
 all: $(ALL)
 
@@ -34,4 +35,4 @@ planar_test: src/planar_test.cpp planar.o oracle_internal.o oracle.o
 	g++ src/planar_test.cpp planar.o oracle_internal.o oracle.o -o planar_test $(CXXFLAGS)
 
 clean:
-	rm -f $(ALL)
+	rm -f $(ALL) *.o

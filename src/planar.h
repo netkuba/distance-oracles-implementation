@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <limits>
+#include <cassert>
 
 using std::vector;
 
@@ -46,6 +47,11 @@ public:
     }
     
     int add_edge(int u, int v, W w = infinity) {
+        assert(u != v);
+        for (auto &e: es()) {
+            assert(u != e.u || v != e.v);
+            assert(v != e.u || u != e.v);
+        }
         int res = es().size();
         es().push_back(Edge(u, v, w));
         vs()[u].edges.push_back(res);

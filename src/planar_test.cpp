@@ -18,8 +18,11 @@ void printEmbedded(PlanarGraph& pg) {
     return;
 }
 
-const int n = 100;
-const int m = 5;
+const int n = 20;
+const int m = 100;
+const W eps = 0.5;
+
+const int t = 1000;
 
 int main() {
     vector< pair< int, int > > edge;
@@ -37,36 +40,54 @@ int main() {
             weight.push_back(rand()%m+1);
         }
 
-    PlanarOracle oracle(n*n, edge, weight, 5);
+    PlanarOracle oracle(n*n, edge, weight, eps);
 
-    for (int i=0; i<(int)oracle.pieces.size(); ++i) {
-        PlanarGraph& pg = oracle.pieces[i].first;
-        vector<int>& mapping = oracle.pieces[i].second;
-        vector<int>& portal = oracle.portals[i];
+    printf("\n\n ==== ===== ==== \n\n");
 /*
-        embed(pg);
-        printf("Piece %d\n", i);
-        printEmbedded(pg);
-        printf("\n");
-        printf("Mapping:\n");
-        for (auto v: mapping) {
-            printf("%d ", v);
+    int u = 6, v = 10;
+    for (int i=0; i<oracle.pieces.size(); ++i) {
+        vector<int> mapping = oracle.pieces[i].second;
+        bool oku = false, okv = false;
+        for (int j=0; j<mapping.size(); ++j) {
+            if (mapping[j] == u) oku = true;
+            if (mapping[j] == v) okv = true;
+        }
+        if (!oku || !okv) continue;
+
+        embed(oracle.pieces[i].first);
+        printEmbedded(oracle.pieces[i].first);
+
+        printf("Portals\n");
+        for (int j=0; j<oracle.portals.size(); ++j) {
+            if (oracle.portals[j].p == i) {
+                printf("%d ", oracle.portals[j].v);
+            }
         }
         printf("\n");
-        printf("Portals:\n");
-        for (auto v: portal) {
-            printf("%d ", v);
+
+        printf("Mapping\n");
+        for (int j=0; j<mapping.size(); ++j) {
+            printf("%d ", mapping[j]);
         }
-        printf("\n");
-        printf("\n");*/
+        printf("\n\n");
     }
-/*
-    for (int i=0; i<(int)oracle.graph.vs().size(); ++i) {
-        printf("Clusters %d (%d): \n", i, (int)oracle.clusters[i].size());
-        for (auto c: oracle.clusters[i]) {
-            printf("%d - %d\n", c.first, c.second);
-        }
-    }
+
+    printf("%d!\n", oracle.pieces.size());
 */
+    for (int tt=0; tt<t; ++tt) {
+        int u = rand()%(n*n), v = rand()%(n*n);
+        if (u == v) continue;
+        W exact = oracle.exact_to_vertex(u, v);
+        W approx = oracle.distance_to_vertex(u, v);
+        printf("%.4lf - %.4lf\n", exact, approx);
+        if (approx < exact) {
+            printf("%d - %d\n", u, v);
+            assert(approx >= exact);
+        }
+        if (approx > exact * (1 + eps)) {
+            printf("%d - %d\n", u, v); 
+            assert(approx <= exact * (1 + eps*2));
+        }
+    }
     return 0;
 }

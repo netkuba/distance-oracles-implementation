@@ -9,7 +9,7 @@ PlanarOracle::PlanarOracle(
         int n,
         vector< pair< int, int > > edge, 
         vector< W > weight,
-        W eps) : graph(n), clusters(n) {
+        W eps) : graph(n), vertex_to_portal(n) {
 
     for (int i=0; i<(int)edge.size(); ++i) {
         graph.add_edge(edge[i].first, edge[i].second, weight[i]);
@@ -26,6 +26,9 @@ PlanarOracle::PlanarOracle(
         maxD *= 2;
     }
 
+    vector< W > preAlpha;
+    vector< vector<int> > prePortals;
+
     {
         vector< vector<int> > parents;
         W alpha = minD;
@@ -35,28 +38,29 @@ PlanarOracle::PlanarOracle(
             getAlphaFamily(graph, alpha, tmpSubgs, tmpMappings, tmpParents);
 
             for (int i=0; i<(int)tmpSubgs.size(); ++i) {
+
+                for (int j=1; j<(int)tmpMappings[i].size(); ++j) {
+                    assert(tmpMappings[i][j] != -1);
+                }
+
                 pieces.push_back(make_pair(tmpSubgs[i], tmpMappings[i]));
                 parents.push_back(tmpParents[i]);
+                preAlpha.push_back(alpha);
             }
 
             alpha *= 2;
         }
 
         for (int i=0; i<(int)pieces.size(); ++i) {
-            portals.push_back(vector<int>());
-            PlanarGraph& pg = pieces[i].first;
-            vector<int>& mapping = pieces[i].second;
+
+            prePortals.push_back(vector<int>());
+            PlanarGraph pg = pieces[i].first;
+            vector<int> mapping = pieces[i].second;
+            alpha = preAlpha[i];
 
             if (pg.vs().size() <= 3) {
                 for (int v=0; v<(int)pg.vs().size(); ++v) {
-                    portals.back().push_back(v);
-                }
-                for (int v=0; v<(int)portals.back().size(); ++v) {
-                    for (int u=0; u<(int)mapping.size(); ++u) {
-                        if (mapping[u] == -1) continue;
-                        clusters[mapping[u]].push_back(
-                                make_pair(i, v));
-                    }
+                    prePortals.back().push_back(v);
                 }
                 continue;
             }
@@ -75,27 +79,58 @@ PlanarOracle::PlanarOracle(
                 }
                 pieces.push_back(make_pair(tmpSubgs[j], tmpMappings[j]));
                 parents.push_back(tmpParents[j]);
+                preAlpha.push_back(alpha);
             }
-
             for (int j=0; j<(int)tmpPaths.size(); ++j) {
                 pair<int, int> prevV(-1, -1);
-                W dist = 0; 
+                W dist = 0;
                 for (auto v: tmpPaths[j]) {
                     if (dist > alpha*eps/4) {
-                        portals.back().push_back(prevV.first);
+                        prePortals.back().push_back(prevV.first);
                         dist = prevV.second;
                     }
                     dist += v.second;
                     prevV = v;
                 }
             }
-            for (int v=0; v<(int)portals.back().size(); ++v) {
-                for (int u=0; u<(int)mapping.size(); ++u) {
-                    if (mapping[u] == -1) continue;
-                    clusters[mapping[u]].push_back(
-                            make_pair(i, v));
+        }
+    }
+
+    {
+        for (int i=0; i<(int)prePortals.size(); ++i) {
+            vector<W> distances;
+            for (int p: prePortals[i]) {
+                getDistances(pieces[i].first, p, distances);
+                portals.push_back(Portal(i, p));
+                vector<int> mapping = pieces[i].second;
+                for (int j=0; j<(int)mapping.size(); ++j) {
+                    if (mapping[j] == -1) continue;
+                    int v = mapping[j];
+                    portals.back().to_vertex[v] = distances[j];
+                    vertex_to_portal[v][portals.size()-1] = distances[j];
                 }
             }
         }
     }
+}
+
+
+
+W PlanarOracle::distance_to_vertex(int v, int u) {
+    W res = infinity;
+    printf("%d - %d\n", vertex_to_portal[v].size(), graph.vs().size()); 
+    for (auto vp: vertex_to_portal[v]) {
+        int pp = portals[vp.first].p;
+        int vv = portals[vp.first].v;
+        auto pu = portals[vp.first].to_vertex.find(u);
+        if (pu == portals[vp.first].to_vertex.end()) continue;
+        res = min(res, vp.second + pu->second);
+    }
+    return res;
+}
+
+W PlanarOracle::exact_to_vertex(int v, int u) {
+    vector<W> distances;
+    getDistances(graph, v, distances);
+    return distances[u];
 }
