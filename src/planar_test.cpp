@@ -18,7 +18,7 @@ void printEmbedded(PlanarGraph& pg) {
     return;
 }
 
-const int n = 20;
+const int n = 10;
 const int m = 1000;
 const W eps = 0.5;
 
@@ -42,24 +42,6 @@ int main() {
 
     PlanarOracle oracle(n*n, edge, weight, eps);
 
-    printf("PYTAM! %d\n", oracle.pieces.size());
-/*
-    for (int j=0; j<oracle.pieces.size(); ++j) {
-        printf("Graf %d\n", j);
-        auto pg = oracle.pieces[j].first;
-        auto mapping = oracle.pieces[j].second;
-        auto portals = oracle.portals;
-        embed(pg);
-        printEmbedded(pg);
-        for (int i=0; i<mapping.size(); ++i) printf("%d ", mapping[i]);
-        printf("\n");
-        for (int i=0; i<portals.size(); ++i) if (portals[i].p == j) printf("%d ", portals[i].v);
-        printf("\n\n");
-    }
-    printf("Portals!\n");
-    auto portals = oracle.portals;
-    for (int i=0; i<portals.size(); ++i) printf("%d %d!\n", portals[i].p, portals[i].v);
-*/
     int sum = 0;
     for (int i=0; i<(int)oracle.portals.size(); ++i) {
         sum += oracle.portals[i].N.size();

@@ -1,6 +1,6 @@
 ALL= boost_wrapper.o test rotate graph_test planar_test oracle.o
 #CXXFLAGS= -std=c++11 -O3
-CXXFLAGS= -std=c++11 -Wall -ggdb -pg -O2
+CXXFLAGS= -std=c++11 -Wall -ggdb
 
 all: $(ALL)
 

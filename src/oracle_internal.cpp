@@ -39,6 +39,72 @@ getDistances(
 
 }
 
+static void
+extractSubgraph(
+        PlanarGraph& g,
+        vector<int>& parent,
+        vector<int>& selection,
+        PlanarGraph& subg,
+        vector<int>& subparent,
+        vector<int>& vInd,
+        vector<int>& eInd,
+        vector<int>& mapping) {
+    
+    typedef PlanarGraph::Vertex Vertex;
+
+    vInd = vector<int>(g.vs().size(), -1);
+    eInd = vector<int>(g.es().size(), -1);
+    subg = PlanarGraph(1);
+
+    mapping.clear();
+    mapping.push_back(-1);
+
+    for (int i=0; i<(int)selection.size(); ++i) {
+        if (selection[i] == 1) {
+            vInd[i] = subg.vs().size();
+            mapping.push_back(i);
+            subg.vs().push_back(Vertex());
+        }
+    }
+
+    subparent = vector<int>(subg.vs().size(), -1);
+
+    bool contr = false;
+    for (int e=0; e<(int)g.es().size(); ++e) {
+        int u = g.es()[e].u;
+        int v = g.es()[e].v;
+        int su = selection[u];
+        int sv = selection[v];
+
+        if ((su == 1) && (sv == 1)) {
+            if (e == parent[u]) {
+                subparent[vInd[u]] = subg.es().size();
+            }
+            if (e == parent[v]) {
+                subparent[vInd[v]] = subg.es().size();
+            }
+            eInd[e] = subg.es().size();
+            subg.add_edge(vInd[u], vInd[v], g.es()[e].w);
+        } else if((e == parent[u]) && (su == 1) && (sv == 0)) {
+            contr = true;
+            subparent[vInd[u]] = subg.es().size();
+            eInd[e] = subg.es().size();
+            subg.add_edge(0, vInd[u], infinity);
+        } else if ((e == parent[v]) && (su == 0) && (sv == 1)) {
+            contr = true;
+            subparent[vInd[v]] = subg.es().size();
+            eInd[e] = subg.es().size();
+            subg.add_edge(0, vInd[v], infinity);
+        }
+    }
+
+    if (!contr && subg.vs().empty()) {
+        subparent[vInd[0]] = subg.es().size();
+        subg.add_edge(0, vInd[0], infinity);
+    }
+    return;
+}
+
 void
 getAlphaFamily(
         PlanarGraph& g, 
@@ -46,6 +112,7 @@ getAlphaFamily(
         vector< PlanarGraph >& subgs,
         vector< vector<int> >& mappings,
         vector< vector<int> >& parents) {
+    
     typedef PlanarGraph::Vertex Vertex;
 
     vector<int> parent(g.vs().size(), -1);
@@ -81,62 +148,20 @@ getAlphaFamily(
     
     for (int l = 0; l <= maxLayer; ++l) {
         int la = l-1, lb = l+1; 
-
-        vector<int> mapping;
-        vector<int> vInd(g.vs().size(), -1), eInd(g.es().size(), -1);
-
-        PlanarGraph subg(1);
-        mapping.push_back(-1);
-
-        for (int i=0; i<(int)layer.size(); ++i) {
-            if (la <= layer[i] && layer[i] <= lb) {
-                vInd[i] = subg.vs().size();
-//                if (layer[i] == l) {
-                    mapping.push_back(i);
-//                } else {
-//                    mapping.push_back(-1);
-//                }
-                subg.vs().push_back(Vertex());
-            }
+        
+        vector<int> selection(g.vs().size(), 0);
+        for (int i=0; i<(int)g.vs().size(); ++i) {
+            int l = layer[i];
+            if ((la <= l) && (l <= lb)) selection[i] = 1;
         }
 
-        vector<int> subparent(subg.vs().size(), -1);
-        for (int e=0; e<(int)g.es().size(); ++e) {
-            int u = g.es()[e].u;
-            int v = g.es()[e].v;
-            int lu = layer[u];
-            int lv = layer[v];
+        PlanarGraph subg;
+        vector<int> mapping, vInd, eInd, subparent;
 
-            if ((la <= lu) && (lu <= lb) && 
-                    (la <= lv) && (lv <= lb)) {
-                if (e == parent[u]) {
-                    subparent[vInd[u]] = subg.es().size();
-                }
-                if (e == parent[v]) {
-                    subparent[vInd[v]] = subg.es().size();
-                }
-                eInd[e] = subg.es().size();
-                subg.add_edge(vInd[u], vInd[v], g.es()[e].w);
-            } else if((la <= lu) && (lu <= lb) && 
-                    (la > lv) && (e == parent[u])) {
-                subparent[vInd[u]] = subg.es().size();
-                eInd[e] = subg.es().size();
-//                subg.add_edge(0, vInd[u], dist[u] - la*alpha);
-                subg.add_edge(0, vInd[u], infinity);
-            } else if ((la > lu) && (e == parent[v]) &&
-                    (la <= lv) && (lv <= lb)) {
-                subparent[vInd[v]] = subg.es().size();
-                eInd[e] = subg.es().size();
-//                subg.add_edge(0, vInd[v], dist[v] - la*alpha);
-                subg.add_edge(0, vInd[v], infinity);
-            }
-        }
-
-        if (la <= 0) {
-            subparent[vInd[0]] = subg.es().size();
-            subg.add_edge(0, vInd[0], infinity);
-        }
-
+        extractSubgraph(
+            g, parent, selection,
+            subg, subparent, vInd, eInd, mapping);
+        
         subgs.push_back(subg);
         mappings.push_back(mapping);
         parents.push_back(subparent);
@@ -279,6 +304,20 @@ subdivide(
     for (int i=0; i<3; ++i) {
         if (xl[i] == -1) continue;
         
+        vector<int> selection(g.vs().size(), 0);
+        for (int j=0; j<(int)g.vs().size(); ++j) {
+            if (vsplit[j] == i) selection[j] = 1;
+            else selection[j] = -1;
+        }
+
+        PlanarGraph tmpSubg;
+        vector<int> tmpMapping, vInd, eInd, tmpParent;
+
+        extractSubgraph(
+            g, parent, selection,
+            tmpSubg, tmpParent, vInd, eInd, tmpMapping);
+        
+/*
         vector<int> tmpMapping;
         PlanarGraph tmpSubg(1);
         tmpMapping.push_back(-1);
@@ -313,9 +352,10 @@ subdivide(
         int important = 0;
         for (int m: tmpMapping) if (m != -1) ++important;
         if (important <= 1) continue;
-
+*/
         subgs.push_back(tmpSubg);
         mappings.push_back(tmpMapping);
         parents.push_back(tmpParent);
+
     } 
 }
