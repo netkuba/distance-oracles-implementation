@@ -18,7 +18,7 @@ void printEmbedded(PlanarGraph& pg) {
     return;
 }
 
-const int n = 100;
+const int n = 20;
 const int m = 1000;
 const W eps = 0.5;
 
@@ -62,16 +62,16 @@ int main() {
 */
     int sum = 0;
     for (int i=0; i<(int)oracle.portals.size(); ++i) {
-        sum += oracle.portals[i].to_vertex.size();
+        sum += oracle.portals[i].N.size();
     }
 
     printf("%d / %d = %d\n", sum, n*n, sum / (n*n));
-
+/*
     for (int tt=0; tt<t; ++tt) {
         int u = rand()%(n*n), v = rand()%(n*n);
         if (u == v) continue;
         W exact = oracle.exact_to_vertex(u, v);
-        W approx = oracle.distance_to_vertex(u, v);
+        W approx = oracle.distance_to_color(u, v);
         if (approx != exact) {
             printf("%.4lf - %.4lf\n", exact, approx);
         }
@@ -84,5 +84,6 @@ int main() {
             assert(approx <= exact * (1 + eps));
         }
     }
+*/
     return 0;
 }

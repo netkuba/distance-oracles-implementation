@@ -240,7 +240,7 @@ subdivide(
                 assert(false);
             }
             if (n <= 0) n += (g.vs().size()-1) * 2;
-            if (n > (g.vs().size()-1) * 4 / 3) {
+            if (n >  (g.vs().size()-1)*2 / 2 ) { // log_{2}
                 stop = false;
                 xe[0] = xe[i];
                 x[0] = x[(i+1)%3];

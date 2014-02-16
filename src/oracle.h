@@ -4,25 +4,33 @@
 #include "planar.h"
 #include "oracle_internal.h"
 
-#include <unordered_map>
-using std::unordered_map;
+#include <map>
+#include <set>
+using std::map;
+using std::set;
 
 class PlanarOracle {
 private:
 
     struct Portal {
         int p, v;
-        unordered_map<int, W> to_vertex;
-        unordered_map<int, W> to_color;
+        map<int, W> N;
+        set< pair<W, int> > H;
         
         Portal(int pp, int vv) : p(pp), v(vv) {}
+    };
+
+    struct Label {
+        bool active = false;
+        vector< pair<int, int> > L; // pair (v, p)
     };
 
 public:
     PlanarGraph graph;
     vector< pair< PlanarGraph, vector<int> > > pieces; // with mapping
     vector< Portal > portals; // for each graph list of portals and their indices
-    vector< unordered_map<int, W> > vertex_to_portal;
+    vector< Label > labels; // 
+    vector< map<int, W> > vertex_to_portal;
    
     PlanarOracle(
             int n,
@@ -30,12 +38,12 @@ public:
             vector< W > weights,
             W eps);
 
-    void merge(int u, int v);
-
-    W exact_to_vertex(int v, int u);
-    W distance_to_vertex(int v, int u);
+    int merge(int v, int u);
+    void activate(int v);
     W distance_to_color(int v, int u);
     W distance_to_closest(int v);
+
+    W exact_to_vertex(int v, int u);
 };
 
 #endif

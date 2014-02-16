@@ -6,12 +6,13 @@ using std::min;
 using std::max;
 using std::make_pair;
 using std::sort;
+using std::swap;
 
 PlanarOracle::PlanarOracle(
         int n,
         vector< pair< int, int > > edge, 
         vector< W > weight,
-        W eps) : graph(n), vertex_to_portal(n) {
+        W eps) : graph(n), vertex_to_portal(n), labels(n) {
 
     for (int i=0; i<(int)edge.size(); ++i) {
         graph.add_edge(edge[i].first, edge[i].second, weight[i]);
@@ -73,22 +74,7 @@ PlanarOracle::PlanarOracle(
             
             subdivide(pg, parents[i], tmpSubgs, tmpMappings, 
                     tmpParents, tmpPaths);
-/*
-            printf("Robie %d (%d)\n", i, pg.es().size());
-            for (int j=0; j<pg.es().size(); ++j) {
-                printf("%lf ", pg.es()[j].w);
-            }
-            printf("\n");
-
-            for (int j=0; j<(int)tmpPaths.size(); ++j) {
-                auto v = tmpPaths[j];
-                for (auto u: v) {
-                    printf("%d (%lf) ", u.first, pg.es()[u.second].w);
-                }
-                printf("\n");
-            }
-            printf("\n");
-*/
+            
             for (int j=0; j<(int)tmpSubgs.size(); ++j) {
                 for (int k=0; k<(int)tmpMappings[j].size(); ++k) {
                     if (tmpMappings[j][k] == -1) continue;
@@ -110,13 +96,7 @@ PlanarOracle::PlanarOracle(
                     prevV = v;
                 }
             }
-/*
-            printf("Dostaje\n");
-            for (auto v: prePortals.back()) {
-                printf("%d ", v);
-            }
-            printf("\n");
-*/
+
             sort(prePortals.back().begin(), prePortals.back().end());
             auto it = unique(prePortals.back().begin(), prePortals.back().end());
             prePortals.back().resize(std::distance(prePortals.back().begin(), it));
@@ -133,24 +113,68 @@ PlanarOracle::PlanarOracle(
                 for (int j=0; j<(int)mapping.size(); ++j) {
                     if (mapping[j] == -1) continue;
                     int v = mapping[j];
-                    portals.back().to_vertex[v] = distances[j];
+
+                    portals.back().N[v] = distances[j];
                     vertex_to_portal[v][portals.size()-1] = distances[j];
+                    labels[v].L.push_back(make_pair(v, i));
                 }
             }
         }
     }
 }
 
+void PlanarOracle::activate(int v) {
+    labels[v].active = true;
+    for (auto l: labels[v].L) {
+        int p = l.second;
+        portals[p].H.insert(make_pair(portals[p].N[v], v));
+    }
+}
 
+int PlanarOracle::merge(int v, int u) {
+    if (labels[v].L.size() < labels[u].L.size()) swap(u,v);
+    if (labels[v].active) {
+        for (auto l: labels[u].L) {
+            int p = l.second;
 
-W PlanarOracle::distance_to_vertex(int v, int u) {
+            W du = portals[p].N[u];
+            portals[p].N.erase(u);
+            portals[p].H.erase(make_pair(du, u));
+
+            auto it = portals[p].N.find(v);
+            if (it != portals[p].N.end()) {
+                W dv = it->second;
+                W du = min(du, dv);
+                portals[p].H.erase(make_pair(dv, v));
+            }
+
+            portals[p].N[v] = du;
+            portals[p].H.insert(make_pair(du, v));
+        }
+    }
+
+    labels[v].L.insert(labels[v].L.end(), labels[u].L.begin(), labels[u].L.end());
+    labels[u].L.clear();
+    return v;
+}
+
+W PlanarOracle::distance_to_color(int v, int u) {
     W res = infinity;
-    for (auto vp: vertex_to_portal[v]) {
-        int pp = portals[vp.first].p;
-        int vv = portals[vp.first].v;
-        auto pu = portals[vp.first].to_vertex.find(u);
-        if (pu == portals[vp.first].to_vertex.end()) continue;
-        res = min(res, vp.second + pu->second);
+    for (auto it: vertex_to_portal[v]) {
+        int p = it.first;
+        auto itt = portals[p].N.find(u);
+        if (itt == portals[p].N.end()) continue;
+        res = min(res, it.second + itt->second);
+    }
+    return res;
+}
+
+W PlanarOracle::distance_to_closest(int v) {
+    W res = infinity;
+    for (auto it: vertex_to_portal[v]) {
+        int p = it.first;
+        if (portals[p].H.empty()) continue;
+        res = min(res, it.second + portals[p].H.begin()->first);
     }
     return res;
 }
