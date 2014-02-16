@@ -307,7 +307,6 @@ subdivide(
         vector<int> selection(g.vs().size(), 0);
         for (int j=0; j<(int)g.vs().size(); ++j) {
             if (vsplit[j] == i) selection[j] = 1;
-            else selection[j] = -1;
         }
 
         PlanarGraph tmpSubg;
@@ -317,42 +316,6 @@ subdivide(
             g, parent, selection,
             tmpSubg, tmpParent, vInd, eInd, tmpMapping);
         
-/*
-        vector<int> tmpMapping;
-        PlanarGraph tmpSubg(1);
-        tmpMapping.push_back(-1);
-
-        for (int u=0; u<(int)g.vs().size(); ++u) if (vsplit[u] == i) {
-            vInd[u] = tmpSubg.vs().size();
-            tmpMapping.push_back(u);
-            tmpSubg.vs().push_back(Vertex());
-        }
-
-        vector<int> tmpParent(tmpMapping.size(), -1);
-
-        for (int e=0; e<(int)g.es().size(); ++e) {
-            int u = g.es()[e].u, v = g.es()[e].v;
-            if ((parent[u] == e) && (vsplit[u] == i)) {
-                tmpParent[vInd[u]] = tmpSubg.es().size();
-                if (vsplit[v] != i) {
-                    tmpSubg.add_edge(vInd[u], 0, infinity);
-                }
-            }
-            if ((parent[v] == e) && (vsplit[v] == i)) {
-                tmpParent[vInd[v]] = tmpSubg.es().size();
-                if (vsplit[u] != i) {
-                    tmpSubg.add_edge(vInd[v], 0, infinity);
-                }
-            }
-            if ((vsplit[u] == i) && (vsplit[v] == i)) {
-                tmpSubg.add_edge(vInd[u], vInd[v], g.es()[e].w);
-            } 
-        }
-
-        int important = 0;
-        for (int m: tmpMapping) if (m != -1) ++important;
-        if (important <= 1) continue;
-*/
         subgs.push_back(tmpSubg);
         mappings.push_back(tmpMapping);
         parents.push_back(tmpParent);
