@@ -29,8 +29,8 @@ public:
     PlanarGraph graph;
     vector< pair< PlanarGraph, vector<int> > > pieces; // with mapping
     vector< Portal > portals; // for each graph list of portals and their indices
-    vector< Label > labels; // 
     vector< map<int, W> > vertex_to_portal;
+    vector< Label > labels;
    
     PlanarOracle(
             int n,

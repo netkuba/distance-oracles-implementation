@@ -17,6 +17,8 @@ PlanarOracle::PlanarOracle(
     for (int i=0; i<(int)edge.size(); ++i) {
         graph.add_edge(edge[i].first, edge[i].second, weight[i]);
     }
+    embed(graph);
+
     
     double minD = infinity, maxD = 0;
     {

@@ -18,7 +18,7 @@ void printEmbedded(PlanarGraph& pg) {
     return;
 }
 
-const int n = 10;
+const int n = 50;
 const int m = 1000;
 const W eps = 0.5;
 
