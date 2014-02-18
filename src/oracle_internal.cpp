@@ -9,6 +9,7 @@ using std::priority_queue;
 using std::pair;
 using std::make_pair;
 using std::greater;
+using std::min;
 using std::max;
 
 void
@@ -197,11 +198,13 @@ getAlphaFamily(
         }
     }
 
-    vector<int> layer(g.vs().size());
     int maxLayer = 0;
     for (int i=0; i<(int)g.vs().size(); ++i) {
-        layer[i] = (int)(dist[i] / alpha);
-        maxLayer = max(maxLayer, layer[i]);
+        maxLayer = max(maxLayer, (int)(dist[i] / alpha));
+    }
+    vector< vector<int> > layers(maxLayer+1);
+    for (int i=0; i<(int)g.vs().size(); ++i) {
+        layers[(int)(dist[i] / alpha)].push_back(i);
     }
 
     vector< pair< PlanarGraph, vector<int> > > result;
@@ -212,9 +215,8 @@ getAlphaFamily(
         int la = l-1, lb = l+1; 
         
         vector<int> selection;
-        for (int i=0; i<(int)g.vs().size(); ++i) {
-            int l = layer[i];
-            if ((la <= l) && (l <= lb)) selection.push_back(i);
+        for (int i=max(0, la); i<=min(maxLayer, lb); ++i) {
+            selection.insert(selection.end(), layers[i].begin(), layers[i].end());
         }
 
         PlanarGraph subg;
@@ -362,6 +364,8 @@ subdivide(
     }
     vsplit[0] = -1;
 
+    vector< int > vInd(g.vs().size(), -1);
+    vector< int > eInd(g.es().size(), -1);
     for (int i=0; i<3; ++i) {
         if (xl[i] == -1) continue;
         
@@ -372,10 +376,7 @@ subdivide(
 
         PlanarGraph tmpSubg;
         vector<int> tmpMapping, tmpParent;
-        vector< int > vInd(g.vs().size(), -1);
-        vector< int > eInd(g.es().size(), -1);
     
-
         extractSubgraph(
             g, parent, selection,
             tmpSubg, tmpParent, tmpMapping,

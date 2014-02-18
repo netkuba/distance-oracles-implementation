@@ -8,6 +8,27 @@ using std::make_pair;
 using std::sort;
 using std::swap;
 
+void PlanarOracle::processPortals(
+        int i,
+        PlanarGraph& pg,
+        vector<int>& mapping,
+        vector<int>& newPortals) {
+    
+    vector<W> distances;
+    for (int p: newPortals) {
+        getDistances(pg, p, distances);
+        portals.push_back(Portal(i, p));
+        for (int j=0; j<(int)mapping.size(); ++j) {
+            if (mapping[j] == -1) continue;
+            int v = mapping[j];
+
+            portals.back().N[v] = distances[j];
+            vertex_to_portal[v][portals.size()-1] = distances[j];
+            labels[v].L.push_back(make_pair(v, i));
+        }
+    }
+}
+
 PlanarOracle::PlanarOracle(
         int n,
         vector< pair< int, int > > edge, 
@@ -32,7 +53,6 @@ PlanarOracle::PlanarOracle(
     }
 
     vector< W > preAlpha;
-    vector< vector<int> > prePortals;
 
     {
         vector< vector<int> > parents;
@@ -58,15 +78,18 @@ PlanarOracle::PlanarOracle(
 
         for (int i=0; i<(int)pieces.size(); ++i) {
 
-            prePortals.push_back(vector<int>());
+            vector<int> newPortals;
+
             PlanarGraph pg = pieces[i].first;
             vector<int> mapping = pieces[i].second;
             alpha = preAlpha[i];
 
             if (pg.vs().size() <= 3) {
                 for (int v=0; v<(int)pg.vs().size(); ++v) {
-                    prePortals.back().push_back(v);
+                    newPortals.push_back(v);
                 }
+                processPortals(i, pg, mapping, newPortals);
+
                 continue;
             }
 
@@ -91,7 +114,7 @@ PlanarOracle::PlanarOracle(
                 W dist = 0;
                 for (auto v: tmpPaths[j]) {
                     if (dist > alpha*eps/4) {
-                        prePortals.back().push_back(prevV.first);
+                        newPortals.push_back(prevV.first);
                         dist = pg.es()[prevV.second].w;
                     }
                     dist += pg.es()[v.second].w;
@@ -99,28 +122,11 @@ PlanarOracle::PlanarOracle(
                 }
             }
 
-            sort(prePortals.back().begin(), prePortals.back().end());
-            auto it = unique(prePortals.back().begin(), prePortals.back().end());
-            prePortals.back().resize(std::distance(prePortals.back().begin(), it));
-        }
-    }
+            sort(newPortals.begin(), newPortals.end());
+            auto it = unique(newPortals.begin(), newPortals.end());
+            newPortals.resize(std::distance(newPortals.begin(), it));
 
-    {
-        for (int i=0; i<(int)prePortals.size(); ++i) {
-            vector<W> distances;
-            for (int p: prePortals[i]) {
-                getDistances(pieces[i].first, p, distances);
-                portals.push_back(Portal(i, p));
-                vector<int> mapping = pieces[i].second;
-                for (int j=0; j<(int)mapping.size(); ++j) {
-                    if (mapping[j] == -1) continue;
-                    int v = mapping[j];
-
-                    portals.back().N[v] = distances[j];
-                    vertex_to_portal[v][portals.size()-1] = distances[j];
-                    labels[v].L.push_back(make_pair(v, i));
-                }
-            }
+            processPortals(i, pg, mapping, newPortals);
         }
     }
 }

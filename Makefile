@@ -1,6 +1,6 @@
 ALL= boost_wrapper.o test rotate graph_test planar_test oracle.o
-#CXXFLAGS= -std=c++11 -O3
-CXXFLAGS= -std=c++11 -Wall -ggdb
+CXXFLAGS= -std=c++11 -O3
+#CXXFLAGS= -std=c++11 -Wall -ggdb
 
 all: $(ALL)
 
@@ -14,7 +14,6 @@ rotate: src/rotate.cpp src/AVLTree.h
 
 graph.o: src/graph.cpp src/graph.h
 	g++ src/graph.cpp -c $(CXXFLAGS)
-
 
 graph_test: src/graph_test.cpp src/graph.h boost_wrapper.o graph.o
 	g++ src/graph_test.cpp graph.o -o graph_test $(CXXFLAGS)

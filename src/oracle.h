@@ -25,6 +25,11 @@ private:
         vector< pair<int, int> > L; // pair (v, p)
     };
 
+    void processPortals(
+            int i,
+            PlanarGraph& pg,
+            vector<int>& mapping,
+            vector<int>& portal);
 public:
     PlanarGraph graph;
     vector< pair< PlanarGraph, vector<int> > > pieces; // with mapping
@@ -37,6 +42,7 @@ public:
             vector< pair< int, int > > edges, 
             vector< W > weights,
             W eps);
+
 
     int merge(int v, int u);
     void activate(int v);

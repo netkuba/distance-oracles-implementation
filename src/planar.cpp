@@ -59,12 +59,10 @@ void pgToEm(PlanarGraph& pg, graph_t& g, embedding_t& embedding) {
     }
 
     for (int v=0; v<(int)pg.vs().size(); ++v) {
-        printf("Robie %d\n", v);
         embedding[v].clear();
         if (pg.vs()[v].edges.empty()) continue;
         int e_begin = pg.vs()[v].edges[0], e = e_begin;
         do {
-            printf("Wrzucam %d: %d - %d\n", e, pg.es()[e].u, pg.es()[e].v);
             embedding[v].push_back(eds[e]);
             e = pg.eNext(v, e);
         } while (e != e_begin);    
@@ -136,43 +134,28 @@ void triangulate(PlanarGraph& pg) {
     graph_t g(pg.vs().size());
     embedding_storage_t embedding_storage(num_vertices(g));
     embedding_t embedding(embedding_storage.begin(), get(vertex_index, g));
-
-
-     typedef std::vector< graph_traits<graph_t>::edge_descriptor > 
-             kuratowski_edges_t;
-       kuratowski_edges_t kuratowski_edges;
-
-
+    
     pgToEm(pg, g, embedding);
 
-    make_biconnected_planar(g, embedding);
-    fillEdges(pg, g);
-
-    if(!boyer_myrvold_planarity_test(boyer_myrvold_params::graph = g,
-            boyer_myrvold_params::embedding = &embedding[0]
-            ,boyer_myrvold_params::kuratowski_subgraph = std::back_inserter(kuratowski_edges)
-      )){
-
-        printBoost(g);
-
-        printf("KURATOWSKI\n");
-        kuratowski_edges_t::iterator ki, ki_end;
-        ki_end = kuratowski_edges.end();
-        for(ki = kuratowski_edges.begin(); ki != ki_end; ++ki)
-        {
-            std::cout << *ki << " ";
-        }
-        std::cout << std::endl;
-
-        printEmbedded(pg);
-        exit(1);
-    }
-    
-    make_maximal_planar(g, embedding);
     assert(boyer_myrvold_planarity_test(boyer_myrvold_params::graph = g,
             boyer_myrvold_params::embedding = embedding
             ));
+    
+    make_biconnected_planar(g, embedding);
     fillEdges(pg, g);
+    for (auto vp = vertices(g); vp.first != vp.second; ++vp.first) {
+        embedding[*vp.first].clear();
+    }
+
+    assert(boyer_myrvold_planarity_test(boyer_myrvold_params::graph = g,
+            boyer_myrvold_params::embedding = embedding
+            ));
+    
+    make_maximal_planar(g, embedding);
+    fillEdges(pg, g);
+    assert(boyer_myrvold_planarity_test(boyer_myrvold_params::graph = g,
+            boyer_myrvold_params::embedding = embedding
+            ));
 
     emToPg(g, embedding, pg);
     return;
