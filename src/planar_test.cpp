@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <ctime>
 using namespace std;
 
 void printEmbedded(PlanarGraph& pg) {
@@ -22,10 +23,12 @@ void printEmbedded(PlanarGraph& pg) {
 const int m = 1000;
 const W eps = 0.5;
 
-const int t = 1000;
+const int t = 10000;
 
 int main() {
-    for (int n = 1; n < 100; ++n) {
+//    for (int n = 1; n < 100; ++n) {
+    int n = 100;
+    {
         printf("%d\n", n);
         vector< pair< int, int > > edge;
         vector< W > weight;
@@ -50,6 +53,8 @@ int main() {
 
         printf("%d / %d = %d\n", sum, n*n, sum / (n*n));
 
+        clock_t begin = clock();
+
         for (int tt=0; tt<t; ++tt) {
             int u = rand()%(n*n), v = rand()%(n*n);
             if (u == v) continue;
@@ -67,6 +72,10 @@ int main() {
                 assert(approx <= exact * (1 + eps));
             }
         }
+
+        clock_t end = clock();
+
+        printf("%lf s\n", double(end-begin) / CLOCKS_PER_SEC);
     }
     return 0;
 }

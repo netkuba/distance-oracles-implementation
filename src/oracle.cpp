@@ -8,6 +8,23 @@ using std::make_pair;
 using std::sort;
 using std::swap;
 
+void PlanarOracle::processLeaf(
+        int i,
+        PlanarGraph pg,
+        vector<int>& mapping) {
+    for (int v=0; v<(int)pg.vs().size(); ++v) {
+        if (mapping[v] == -1) continue;
+        vertices[mapping[v]].direct_pieces.push_back(i);
+    }
+    /*
+    vector<int> newPortals;
+    for (int v=0; v<(int)pg.vs().size(); ++v) {
+        newPortals.push_back(v);
+    }
+    processPortals(i, pg, mapping, newPortals);
+    */
+}
+
 void PlanarOracle::processPortals(
         int i,
         PlanarGraph& pg,
@@ -23,7 +40,7 @@ void PlanarOracle::processPortals(
             int v = mapping[j];
 
             portals.back().N[v] = distances[j];
-            vertex_to_portal[v][portals.size()-1] = distances[j];
+            vertices[v].to_portal[portals.size()-1] = distances[j];
             labels[v].L.push_back(make_pair(v, i));
         }
     }
@@ -33,7 +50,7 @@ PlanarOracle::PlanarOracle(
         int n,
         vector< pair< int, int > > edge, 
         vector< W > weight,
-        W eps) : graph(n), vertex_to_portal(n), labels(n) {
+        W eps) : graph(n), vertices(n), labels(n), fu(n) {
 
     for (int i=0; i<(int)edge.size(); ++i) {
         graph.add_edge(edge[i].first, edge[i].second, weight[i]);
@@ -78,24 +95,20 @@ PlanarOracle::PlanarOracle(
 
         for (int i=0; i<(int)pieces.size(); ++i) {
 
-            vector<int> newPortals;
 
             PlanarGraph pg = pieces[i].first;
             vector<int> mapping = pieces[i].second;
             alpha = preAlpha[i];
 
-            if (pg.vs().size() <= 3) {
-                for (int v=0; v<(int)pg.vs().size(); ++v) {
-                    newPortals.push_back(v);
-                }
-                processPortals(i, pg, mapping, newPortals);
-
+            if (pg.vs().size() <= ro) {
+                processLeaf(i, pg, mapping);
                 continue;
             }
 
             vector< vector<int> > tmpParents, tmpMappings;
             vector< PlanarGraph > tmpSubgs;
             vector< vector< pair<int, int> > > tmpPaths;
+            vector<int> newPortals;
             
             subdivide(pg, parents[i], tmpSubgs, tmpMappings, 
                     tmpParents, tmpPaths);
@@ -163,23 +176,38 @@ int PlanarOracle::merge(int v, int u) {
 
     labels[v].L.insert(labels[v].L.end(), labels[u].L.begin(), labels[u].L.end());
     labels[u].L.clear();
+
+    fu.unionn(v, u);
     return v;
 }
 
 W PlanarOracle::distance_to_color(int v, int u) {
     W res = infinity;
-    for (auto it: vertex_to_portal[v]) {
+    for (auto it: vertices[v].to_portal) {
         int p = it.first;
         auto itt = portals[p].N.find(u);
         if (itt == portals[p].N.end()) continue;
         res = min(res, it.second + itt->second);
+    }
+    for (auto it: vertices[v].direct_pieces) {
+        vector<int> mapping = pieces[it].second;
+        int s = -1;
+        for (int i=0; i<(int)mapping.size(); ++i) if (mapping[i] == v) s = i;
+
+        vector<W> distances;
+        getDistances(pieces[it].first, s, distances);
+        for (int i=0; i<(int)mapping.size(); ++i) {
+            if (isOfColor(mapping[i], u)) {
+                res = min(res, distances[i]);
+            }
+        }
     }
     return res;
 }
 
 W PlanarOracle::distance_to_closest(int v) {
     W res = infinity;
-    for (auto it: vertex_to_portal[v]) {
+    for (auto it: vertices[v].to_portal) {
         int p = it.first;
         if (portals[p].H.empty()) continue;
         res = min(res, it.second + portals[p].H.begin()->first);

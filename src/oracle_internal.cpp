@@ -259,14 +259,6 @@ subdivide(
     if (g.vs().size() <= 3) return;
 
     triangulate(g);
-/*
-    for (int i=0; i<(int)parent.size(); ++i) {
-        if (parent[i] == -1) printf("-1 ");
-        else printf("%d ", g.opp(i,parent[i]));
-    }
-    printf("\n");
-    printEmbedded(g);
-*/
     int eC = 0;
     vector< vector< pair< int, int > > > eNum(g.es().size());
 
