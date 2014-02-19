@@ -26,7 +26,7 @@ const W eps = 0.5;
 const int t = 10000;
 
 int main() {
-//    for (int n = 1; n < 100; ++n) {
+//    for (int n = 1; n < 100; ++n)
     int n = 100;
     {
         printf("%d\n", n);

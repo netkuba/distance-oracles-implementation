@@ -14,6 +14,15 @@ private:
 
     static const int ro = 500;
 
+    struct Piece {
+        PlanarGraph graph;
+        vector<int> mapping;
+
+        Piece(const PlanarGraph& gg, 
+                const vector<int>& mm) :
+            graph(gg), mapping(mm) {}
+    };
+
     struct Portal {
         int p, v;
         map<int, W> N;
@@ -57,17 +66,19 @@ private:
     void processLeaf(
             int i,
             PlanarGraph pg,
-            vector<int>& mapping);
+            vector<int>& mapping,
+            vector<bool>& focus);
 
     void processPortals(
             int i,
             PlanarGraph& pg,
             vector<int>& mapping,
-            vector<int>& portal);
+            vector<int>& portal,
+            vector<bool>& focus);
 
 public:
     PlanarGraph graph;
-    vector< pair< PlanarGraph, vector<int> > > pieces; // with mapping
+    vector< Piece > pieces; // with mapping
     vector< Portal > portals; // for each graph list of portals and their indices
     vector< Vertex > vertices;
     vector< Label > labels;

@@ -12,12 +12,13 @@ getAlphaFamily(
         double alpha, 
         vector< PlanarGraph >& subgs,
         vector< vector<int> >& mappings,
-        vector< vector<int> >& parents);
+        vector< vector<int> >& parents,
+        vector< vector<bool> >& focuss);
 
 void
 subdivide(
         PlanarGraph g,
-        vector<int> parent,
+        const vector<int>& parent,
         vector< PlanarGraph >& subgs,
         vector< vector<int> >& mappings,
         vector< vector<int> >& parents,

@@ -11,25 +11,20 @@ using std::swap;
 void PlanarOracle::processLeaf(
         int i,
         PlanarGraph pg,
-        vector<int>& mapping) {
+        vector<int>& mapping,
+        vector<bool>& focus) {
     for (int v=0; v<(int)pg.vs().size(); ++v) {
-        if (mapping[v] == -1) continue;
+        if (!focus[v]) continue;
         vertices[mapping[v]].direct_pieces.push_back(i);
     }
-    /*
-    vector<int> newPortals;
-    for (int v=0; v<(int)pg.vs().size(); ++v) {
-        newPortals.push_back(v);
-    }
-    processPortals(i, pg, mapping, newPortals);
-    */
 }
 
 void PlanarOracle::processPortals(
         int i,
         PlanarGraph& pg,
         vector<int>& mapping,
-        vector<int>& newPortals) {
+        vector<int>& newPortals,
+        vector<bool>& focus) {
     
     vector<W> distances;
     for (int p: newPortals) {
@@ -40,7 +35,9 @@ void PlanarOracle::processPortals(
             int v = mapping[j];
 
             portals.back().N[v] = distances[j];
-            vertices[v].to_portal[portals.size()-1] = distances[j];
+            if (focus[j]) {
+                vertices[v].to_portal[portals.size()-1] = distances[j];
+            }
             labels[v].L.push_back(make_pair(v, i));
         }
     }
@@ -73,11 +70,13 @@ PlanarOracle::PlanarOracle(
 
     {
         vector< vector<int> > parents;
+        vector< vector<bool> > focuss;
         W alpha = minD;
         while (alpha <= maxD) {
             vector< vector<int> > tmpParents, tmpMappings;
+            vector< vector<bool> > tmpFocus;
             vector< PlanarGraph > tmpSubgs;
-            getAlphaFamily(graph, alpha, tmpSubgs, tmpMappings, tmpParents);
+            getAlphaFamily(graph, alpha, tmpSubgs, tmpMappings, tmpParents, tmpFocus);
 
             for (int i=0; i<(int)tmpSubgs.size(); ++i) {
 
@@ -85,8 +84,10 @@ PlanarOracle::PlanarOracle(
                     assert(tmpMappings[i][j] != -1);
                 }
 
-                pieces.push_back(make_pair(tmpSubgs[i], tmpMappings[i]));
+                pieces.push_back(Piece(
+                            tmpSubgs[i], tmpMappings[i]));
                 parents.push_back(tmpParents[i]);
+                focuss.push_back(tmpFocus[i]);
                 preAlpha.push_back(alpha);
             }
 
@@ -96,12 +97,12 @@ PlanarOracle::PlanarOracle(
         for (int i=0; i<(int)pieces.size(); ++i) {
 
 
-            PlanarGraph pg = pieces[i].first;
-            vector<int> mapping = pieces[i].second;
+            PlanarGraph pg = pieces[i].graph;
+            vector<int> mapping = pieces[i].mapping;
             alpha = preAlpha[i];
 
             if (pg.vs().size() <= ro) {
-                processLeaf(i, pg, mapping);
+                processLeaf(i, pg, mapping, focuss[i]);
                 continue;
             }
 
@@ -114,12 +115,18 @@ PlanarOracle::PlanarOracle(
                     tmpParents, tmpPaths);
             
             for (int j=0; j<(int)tmpSubgs.size(); ++j) {
+                vector<bool> tmpFocus;
                 for (int k=0; k<(int)tmpMappings[j].size(); ++k) {
-                    if (tmpMappings[j][k] == -1) continue;
+                    if (tmpMappings[j][k] == -1) {
+                        tmpFocus.push_back(false);
+                        continue;
+                    }
+                    tmpFocus.push_back(focuss[i][tmpMappings[j][k]]);
                     tmpMappings[j][k] = mapping[tmpMappings[j][k]];
                 }
-                pieces.push_back(make_pair(tmpSubgs[j], tmpMappings[j]));
+                pieces.push_back(Piece(tmpSubgs[j], tmpMappings[j]));
                 parents.push_back(tmpParents[j]);
+                focuss.push_back(tmpFocus);
                 preAlpha.push_back(alpha);
             }
             for (int j=0; j<(int)tmpPaths.size(); ++j) {
@@ -139,7 +146,7 @@ PlanarOracle::PlanarOracle(
             auto it = unique(newPortals.begin(), newPortals.end());
             newPortals.resize(std::distance(newPortals.begin(), it));
 
-            processPortals(i, pg, mapping, newPortals);
+            processPortals(i, pg, mapping, newPortals, focuss[i]);
         }
     }
 }
@@ -190,12 +197,12 @@ W PlanarOracle::distance_to_color(int v, int u) {
         res = min(res, it.second + itt->second);
     }
     for (auto it: vertices[v].direct_pieces) {
-        vector<int> mapping = pieces[it].second;
+        vector<int> mapping = pieces[it].mapping;
         int s = -1;
         for (int i=0; i<(int)mapping.size(); ++i) if (mapping[i] == v) s = i;
 
         vector<W> distances;
-        getDistances(pieces[it].first, s, distances);
+        getDistances(pieces[it].graph, s, distances);
         for (int i=0; i<(int)mapping.size(); ++i) {
             if (isOfColor(mapping[i], u)) {
                 res = min(res, distances[i]);

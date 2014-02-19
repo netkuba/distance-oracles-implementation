@@ -43,7 +43,7 @@ getDistances(
 static void
 extractSubgraph(
         PlanarGraph& g,
-        vector<int>& parent,
+        const vector<int>& parent,
         vector<int>& selection,
         PlanarGraph& subg,
         vector<int>& subparent,
@@ -172,7 +172,8 @@ getAlphaFamily(
         double alpha, 
         vector< PlanarGraph >& subgs,
         vector< vector<int> >& mappings,
-        vector< vector<int> >& parents) {
+        vector< vector<int> >& parents,
+        vector< vector<bool> >& focuss) {
     
     typedef PlanarGraph::Vertex Vertex;
 
@@ -227,9 +228,17 @@ getAlphaFamily(
             subg, subparent, mapping,
             vInd, eInd);
         
+        vector<bool> focus(mapping.size(), false);
+        for (int i=0; i<mapping.size(); ++i) {
+            if (mapping[i] == -1) continue;
+            if ((int)(dist[mapping[i]] / alpha) == l)
+                focus[i] = true;
+        }
+
         subgs.push_back(subg);
         mappings.push_back(mapping);
         parents.push_back(subparent);
+        focuss.push_back(focus);
     }
 }
 
@@ -249,7 +258,7 @@ static void printEmbedded(PlanarGraph& pg) {
 void
 subdivide(
         PlanarGraph g,
-        vector<int> parent,
+        const vector<int>& parent,
         vector< PlanarGraph >& subgs,
         vector< vector<int> >& mappings,
         vector< vector<int> >& parents,
