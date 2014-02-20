@@ -21,10 +21,12 @@ oracle_internal.o: src/oracle_internal.cpp src/oracle_internal.h src/planar.h
 oracle.o: src/oracle.cpp src/oracle.h src/oracle_internal.h
 	g++ src/oracle.cpp -c $(CXXFLAGS)
 
-planar_test: src/planar_test.cpp planar.o oracle_internal.o oracle.o
-	g++ src/planar_test.cpp planar.o oracle_internal.o oracle.o -o planar_test $(CXXFLAGS)
+incremental_oracle.o: src/incremental_oracle.cpp src/incremental_oracle.h src/oracle.h src/oracle_internal.h
+	g++ src/incremental_oracle.cpp -c $(CXXFLAGS)
 
-    
+planar_test: src/planar_test.cpp planar.o oracle_internal.o oracle.o incremental_oracle.o
+	g++ src/planar_test.cpp planar.o oracle_internal.o oracle.o incremental_oracle.o -o planar_test $(CXXFLAGS)
+ 
 graph.o: src/graph.cpp src/graph.h
 	g++ src/graph.cpp -c $(CXXFLAGS)
 

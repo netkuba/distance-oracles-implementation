@@ -14,7 +14,7 @@ using std::max;
 
 void
 getDistances(
-        PlanarGraph g,
+        const PlanarGraph& g,
         int u,
         vector<W> &dist) {
     
@@ -42,7 +42,7 @@ getDistances(
 
 static void
 extractSubgraph(
-        PlanarGraph& g,
+        const PlanarGraph& g,
         const vector<int>& parent,
         vector<int>& selection,
         PlanarGraph& subg,
@@ -168,12 +168,12 @@ extractSubgraph(
 
 void
 getAlphaFamily(
-        PlanarGraph& g, 
+        const PlanarGraph& g, 
         double alpha, 
         vector< PlanarGraph >& subgs,
         vector< vector<int> >& mappings,
         vector< vector<int> >& parents,
-        vector< vector<bool> >& focuss) {
+        vector< vector<bool> >& sources) {
     
     typedef PlanarGraph::Vertex Vertex;
 
@@ -228,17 +228,17 @@ getAlphaFamily(
             subg, subparent, mapping,
             vInd, eInd);
         
-        vector<bool> focus(mapping.size(), false);
+        vector<bool> source(mapping.size(), false);
         for (int i=0; i<mapping.size(); ++i) {
             if (mapping[i] == -1) continue;
             if ((int)(dist[mapping[i]] / alpha) == l)
-                focus[i] = true;
+                source[i] = true;
         }
 
         subgs.push_back(subg);
         mappings.push_back(mapping);
         parents.push_back(subparent);
-        focuss.push_back(focus);
+        sources.push_back(source);
     }
 }
 
@@ -257,7 +257,7 @@ static void printEmbedded(PlanarGraph& pg) {
 
 void
 subdivide(
-        PlanarGraph g,
+        PlanarGraph& g,
         const vector<int>& parent,
         vector< PlanarGraph >& subgs,
         vector< vector<int> >& mappings,

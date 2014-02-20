@@ -1,5 +1,5 @@
 #include "planar.h"
-#include "oracle.h"
+#include "incremental_oracle.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -26,8 +26,8 @@ const W eps = 0.5;
 const int t = 10000;
 
 int main() {
-//    for (int n = 1; n < 100; ++n)
-    int n = 100;
+    for (int n = 1; n < 100; ++n)
+//    int n = 100;
     {
         printf("%d\n", n);
         vector< pair< int, int > > edge;
@@ -44,22 +44,20 @@ int main() {
                 weight.push_back(rand()%m+1);
             }
 
-        PlanarOracle oracle(n*n, edge, weight, eps);
+        IncrementalPlanarOracle oracle(n*n, edge, weight, eps);
 
-        int sum = 0;
-        for (int i=0; i<(int)oracle.vertices.size(); ++i) {
-            sum += oracle.vertices[i].to_portal.size();
-        }
-
-        printf("%d / %d = %d\n", sum, n*n, sum / (n*n));
+        PlanarGraph pg(n*n);
+        for (int i=0; i<(int)edge.size(); ++i) pg.add_edge(edge[i].first, edge[i].second, weight[i]);
+        vector<W> dist;
 
         clock_t begin = clock();
 
         for (int tt=0; tt<t; ++tt) {
             int u = rand()%(n*n), v = rand()%(n*n);
             if (u == v) continue;
-            W exact = oracle.exact_to_vertex(u, v);
             W approx = oracle.distance_to_color(u, v);
+            getDistances(pg, v, dist);
+            W exact = dist[u];
             if (approx != exact) {
                 printf("%.4lf - %.4lf\n", exact, approx);
             }

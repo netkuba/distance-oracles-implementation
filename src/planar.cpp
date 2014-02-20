@@ -143,10 +143,6 @@ void triangulate(PlanarGraph& pg) {
     
     make_biconnected_planar(g, embedding);
     fillEdges(pg, g);
-    for (auto vp = vertices(g); vp.first != vp.second; ++vp.first) {
-        embedding[*vp.first].clear();
-    }
-
     assert(boyer_myrvold_planarity_test(boyer_myrvold_params::graph = g,
             boyer_myrvold_params::embedding = embedding
             ));

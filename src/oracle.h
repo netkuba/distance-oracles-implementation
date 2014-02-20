@@ -10,7 +10,7 @@ using std::map;
 using std::set;
 
 class PlanarOracle {
-private:
+protected:
 
     static const int ro = 3;
 
@@ -41,63 +41,45 @@ private:
         vector<int> direct_pieces;
     };
 
-    struct FindUnion {
-        vector<int> p;
-        
-        FindUnion(int n) : p(n) {
-            for (int i=0; i<n; ++i) p[i] = i;
-        }
+    virtual
+    bool isOfColor(int v, int c) = 0;
 
-        int find(int v) {
-            if (p[v] == v) return v;
-            return v = find(p[v]);
-        }
-
-        void unionn(int v, int u) {
-            p[find(u)] = find(v);
-        }
-
-    };
-
-    bool isOfColor(int v, int c) {
-        return fu.find(v) == c;
-    }
-
+    virtual
     void processLeaf(
             int i,
-            PlanarGraph pg,
-            vector<int>& mapping,
-            vector<bool>& focus);
+            const PlanarGraph& pg,
+            const vector<int>& mapping,
+            const vector<bool>& source) = 0;
 
+    virtual
     void processPortals(
             int i,
-            PlanarGraph& pg,
-            vector<int>& mapping,
-            vector<int>& portal,
-            vector<bool>& focus);
+            const PlanarGraph& pg,
+            const vector<int>& mapping,
+            const vector<int>& portal,
+            const vector<bool>& source) = 0;
 
-public:
-    PlanarGraph graph;
-    vector< Piece > pieces; // with mapping
-    vector< Portal > portals; // for each graph list of portals and their indices
-    vector< Vertex > vertices;
-    vector< Label > labels;
-    FindUnion fu;
-
-
-    PlanarOracle(
+    void initialize(
             int n,
-            vector< pair< int, int > > edges, 
-            vector< W > weights,
+            const vector< pair< int, int > >& edges, 
+            const vector< W >& weights,
             W eps);
 
+    PlanarGraph graph;
+    vector< Piece > pieces;
+    vector< Portal > portals;
+    vector< Vertex > vertices;
+    vector< Label > labels;
 
-    int merge(int v, int u);
-    void activate(int v);
-    W distance_to_color(int v, int u);
-    W distance_to_closest(int v);
-
-    W exact_to_vertex(int v, int u);
+public:
+    PlanarOracle() {}
+    PlanarOracle(
+            int n,
+            const vector< pair< int, int > >& edges, 
+            const vector< W >& weights,
+            W eps) {
+        initialize(n, edges, weights, eps);
+    }
 };
 
 #endif

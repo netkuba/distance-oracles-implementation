@@ -42,7 +42,15 @@ public:
         return vertices;
     }
 
+    const vector<Vertex>& vs() const {
+        return vertices;
+    }
+
     vector<Edge>& es() {
+        return edges;
+    }
+
+    const vector<Edge>& es() const {
         return edges;
     }
     
@@ -59,12 +67,17 @@ public:
         return res;
     }
 
-    int opp(int u, int e) {
+    int opp(int u, int e) const {
         if (es()[e].u == u) return es()[e].v;
         return es()[e].u;
     }
 
     int& eNext(int u, int e) {
+        if (es()[e].u == u) return es()[e].uNext;
+        return es()[e].vNext;
+    }
+
+    int eNext(int u, int e) const {
         if (es()[e].u == u) return es()[e].uNext;
         return es()[e].vNext;
     }

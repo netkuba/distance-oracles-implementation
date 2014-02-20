@@ -7,27 +7,27 @@
 using std::pair;
 
 void
+getDistances(
+        const PlanarGraph& g,
+        int u,
+        vector<W> &distances);
+
+void
 getAlphaFamily(
-        PlanarGraph& g, 
+        const PlanarGraph& g, 
         double alpha, 
         vector< PlanarGraph >& subgs,
         vector< vector<int> >& mappings,
         vector< vector<int> >& parents,
-        vector< vector<bool> >& focuss);
+        vector< vector<bool> >& sources);
 
 void
 subdivide(
-        PlanarGraph g,
+        PlanarGraph& g,
         const vector<int>& parent,
         vector< PlanarGraph >& subgs,
         vector< vector<int> >& mappings,
         vector< vector<int> >& parents,
         vector< vector< pair<int, int > > >& paths);
-
-void
-getDistances(
-        PlanarGraph g,
-        int u,
-        vector<W> &distances);
 
 #endif
