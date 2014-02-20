@@ -12,7 +12,7 @@ using std::set;
 class PlanarOracle {
 private:
 
-    static const int ro = 500;
+    static const int ro = 3;
 
     struct Piece {
         PlanarGraph graph;

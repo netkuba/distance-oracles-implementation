@@ -47,8 +47,8 @@ int main() {
         PlanarOracle oracle(n*n, edge, weight, eps);
 
         int sum = 0;
-        for (int i=0; i<(int)oracle.portals.size(); ++i) {
-            sum += oracle.portals[i].N.size();
+        for (int i=0; i<(int)oracle.vertices.size(); ++i) {
+            sum += oracle.vertices[i].to_portal.size();
         }
 
         printf("%d / %d = %d\n", sum, n*n, sum / (n*n));
