@@ -115,9 +115,7 @@ public:
             int n,
             const vector< pair< int, int > >& edges,
             const vector< W >& weights,
-            W eps) : labels(n), forest(n) {
-        initialize(n, edges, weights, eps);
-    }
+            W eps);
 
     int merge(int l1, int l2, int u, int v);
     pair<int, int> split(int l, int u, int v);

@@ -11,11 +11,8 @@ PlanarOracle::initialize(
         const vector< pair< int, int > >& edge, 
         const vector< W >& weight,
         W eps) {
-
     graph = PlanarGraph(n);
     vertices = vector<Vertex>(n);
-    labels = vector<Label>(n);
-
 
     for (int i=0; i<(int)edge.size(); ++i) {
         graph.add_edge(edge[i].first, edge[i].second, weight[i]);

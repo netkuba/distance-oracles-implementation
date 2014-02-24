@@ -5,6 +5,11 @@
 
 class IncrementalPlanarOracle : public PlanarOracle {
     
+    struct Label {
+        bool active = false;
+        vector< pair<int, int> > L; // pair (v, p)
+    };
+
     struct FindUnion {
         vector<int> p;
         
@@ -27,6 +32,11 @@ class IncrementalPlanarOracle : public PlanarOracle {
     bool isOfColor(int v, int c) {
         return fu.find(v) == c;
     }
+
+    virtual
+    bool isActive(int v) {
+        return labels[fu.find(v)].active;
+    }
     
     virtual
     void processLeaf(
@@ -43,6 +53,7 @@ class IncrementalPlanarOracle : public PlanarOracle {
             const vector<int>& portal,
             const vector<bool>& source);
     
+    vector< Label > labels;
     FindUnion fu;
 
 public:
@@ -50,7 +61,7 @@ public:
             int n,
             const vector< pair< int, int > >& edges, 
             const vector< W >& weights,
-            W eps) : fu(n) {
+            W eps) : labels(n), fu(n) {
         initialize(n, edges, weights, eps);
     }
 

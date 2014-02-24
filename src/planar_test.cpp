@@ -1,5 +1,6 @@
 #include "planar.h"
 #include "incremental_oracle.h"
+#include "full_oracle.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -26,8 +27,8 @@ const W eps = 0.5;
 const int t = 10000;
 
 int main() {
-    for (int n = 1; n < 100; ++n)
-//    int n = 100;
+//    for (int n = 1; n < 100; ++n)
+    int n = 10;
     {
         printf("%d\n", n);
         vector< pair< int, int > > edge;
@@ -44,7 +45,8 @@ int main() {
                 weight.push_back(rand()%m+1);
             }
 
-        IncrementalPlanarOracle oracle(n*n, edge, weight, eps);
+        IncrementalPlanarOracle incrementalOracle(n*n, edge, weight, eps);
+        FullPlanarOracle fullOracle(n*n, edge, weight, eps);
 
         PlanarGraph pg(n*n);
         for (int i=0; i<(int)edge.size(); ++i) pg.add_edge(edge[i].first, edge[i].second, weight[i]);
@@ -55,19 +57,16 @@ int main() {
         for (int tt=0; tt<t; ++tt) {
             int u = rand()%(n*n), v = rand()%(n*n);
             if (u == v) continue;
-            W approx = oracle.distance_to_color(u, v);
-            getDistances(pg, v, dist);
-            W exact = dist[u];
-            if (approx != exact) {
-                printf("%.4lf - %.4lf\n", exact, approx);
-            }
-            if (approx < exact) {
+            W approx1 = incrementalOracle.distance_to_color(u, v);
+            W approx2 = fullOracle.distance_to_color(u, v);
+         //   getDistances(pg, v, dist);
+            if (approx1 > approx2 * (1 + eps)) {
                 printf("%d - %d\n", u, v);
-                assert(approx >= exact);
+                assert(approx1 > approx2 * (1 + eps));
             }
-            if (approx > exact * (1 + eps)) {
+            if (approx2 > approx1 * (1 + eps)) {
                 printf("%d - %d\n", u, v); 
-                assert(approx <= exact * (1 + eps));
+                assert(approx2 > approx1 * (1 + eps));
             }
         }
 

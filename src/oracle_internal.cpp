@@ -229,7 +229,7 @@ getAlphaFamily(
             vInd, eInd);
         
         vector<bool> source(mapping.size(), false);
-        for (int i=0; i<mapping.size(); ++i) {
+        for (int i=0; i<(int)mapping.size(); ++i) {
             if (mapping[i] == -1) continue;
             if ((int)(dist[mapping[i]] / alpha) == l)
                 source[i] = true;
@@ -330,7 +330,7 @@ subdivide(
                 assert(false);
             }
             if (n <= 0) n += (g.vs().size()-1) * 2;
-            if (n >  (g.vs().size()-1)*2 / 2 ) { // log_{2}
+            if (n >  ((int)g.vs().size()-1)*2 / 2 ) { // log_{2}
                 stop = false;
                 xe[0] = xe[i];
                 x[0] = x[(i+1)%3];

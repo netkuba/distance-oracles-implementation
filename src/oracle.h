@@ -6,13 +6,17 @@
 
 #include <map>
 #include <set>
+#include <cmath>
 using std::map;
 using std::set;
+using std::min;
+using std::max;
+using std::sqrt;
 
 class PlanarOracle {
 protected:
 
-    static const int ro = 3;
+    int ro;
 
     struct Piece {
         PlanarGraph graph;
@@ -31,11 +35,6 @@ protected:
         Portal(int pp, int vv) : p(pp), v(vv) {}
     };
 
-    struct Label {
-        bool active = false;
-        vector< pair<int, int> > L; // pair (v, p)
-    };
-
     struct Vertex {
         map<int, W> to_portal;
         vector<int> direct_pieces;
@@ -43,6 +42,9 @@ protected:
 
     virtual
     bool isOfColor(int v, int c) = 0;
+
+    virtual
+    bool isActive(int v) = 0;
 
     virtual
     void processLeaf(
@@ -69,7 +71,6 @@ protected:
     vector< Piece > pieces;
     vector< Portal > portals;
     vector< Vertex > vertices;
-    vector< Label > labels;
 
 public:
     PlanarOracle() {}
@@ -78,6 +79,7 @@ public:
             const vector< pair< int, int > >& edges, 
             const vector< W >& weights,
             W eps) {
+        ro = max(min(n, (int)sqrt((float)n)), 3);
         initialize(n, edges, weights, eps);
     }
 };
