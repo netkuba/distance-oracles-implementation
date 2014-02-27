@@ -11,6 +11,7 @@ PlanarOracle::initialize(
         const vector< pair< int, int > >& edge, 
         const vector< W >& weight,
         W eps) {
+    ro = max(min(n, (int)sqrt((float)n)), 3);
     graph = PlanarGraph(n);
     vertices = vector<Vertex>(n);
 
@@ -59,6 +60,8 @@ PlanarOracle::initialize(
             alpha *= 2;
         }
 
+        printf("RO! %d\n", ro);
+
         for (int i=0; i<(int)pieces.size(); ++i) {
 
 
@@ -94,11 +97,14 @@ PlanarOracle::initialize(
                 sources.push_back(tmpFocus);
                 preAlpha.push_back(alpha);
             }
+
+            assert(tmpPaths.size() <= 3);
+
             for (int j=0; j<(int)tmpPaths.size(); ++j) {
                 pair<int, int> prevV(-1, -1);
                 W dist = 0;
                 for (auto v: tmpPaths[j]) {
-                    if (dist > alpha*eps/4) {
+                    if (dist > alpha*eps/2) {
                         newPortals.push_back(prevV.first);
                         dist = pg.es()[prevV.second].w;
                     }
@@ -110,6 +116,8 @@ PlanarOracle::initialize(
             sort(newPortals.begin(), newPortals.end());
             auto it = unique(newPortals.begin(), newPortals.end());
             newPortals.resize(std::distance(newPortals.begin(), it));
+
+            assert(newPortals.size() <= 3 * 3 * (int)(1/eps + 1) * 2);
 
             processPortals(i, pg, mapping, newPortals, sources[i]);
         }

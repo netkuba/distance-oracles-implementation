@@ -22,8 +22,7 @@ void IncrementalPlanarOracle::processPortals(
         const PlanarGraph& pg,
         const vector<int>& mapping,
         const vector<int>& newPortals,
-        const vector<bool>& source) {
-    
+        const vector<bool>& source) {    
     vector<W> distances;
     for (int p: newPortals) {
         getDistances(pg, p, distances);

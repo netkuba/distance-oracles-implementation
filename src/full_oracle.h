@@ -64,6 +64,8 @@ class FullPlanarOracle : public PlanarOracle {
         }
 
         W getDistance(int p) const {
+            assert(!L.empty());
+            if (L.empty()) return infinity;
             int a = 0, b = L.size(), c;
             while (b-a>1) {
                 c = a+b/2;

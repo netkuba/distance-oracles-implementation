@@ -79,7 +79,6 @@ public:
             const vector< pair< int, int > >& edges, 
             const vector< W >& weights,
             W eps) {
-        ro = max(min(n, (int)sqrt((float)n)), 3);
         initialize(n, edges, weights, eps);
     }
 };

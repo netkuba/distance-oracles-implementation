@@ -20,15 +20,15 @@ void printEmbedded(PlanarGraph& pg) {
     return;
 }
 
-//const int n = 50;
-const int m = 1000;
+const int n = 100;
+const int m = 100;
 const W eps = 0.5;
 
-const int t = 1000;
+const int t = 100;
 
 int main() {
 //    for (int n = 1; n < 100; ++n)
-    int n = 100;
+    int n = 30;
     {
         printf("%d\n", n);
         vector< pair< int, int > > edge;
@@ -45,7 +45,7 @@ int main() {
                 weight.push_back(rand()%m+1);
             }
 
-        //IncrementalPlanarOracle incrementalOracle(n*n, edge, weight, eps);
+        IncrementalPlanarOracle incrementalOracle(n*n, edge, weight, eps);
         FullPlanarOracle fullOracle(n*n, edge, weight, eps);
 
         PlanarGraph pg(n*n);
@@ -57,19 +57,27 @@ int main() {
         for (int tt=0; tt<t; ++tt) {
             int u = rand()%(n*n), v = rand()%(n*n);
             if (u == v) continue;
-          //  W approx1 = incrementalOracle.distance_to_color(u, v);
-            W approx1 = fullOracle.distance_to_color(u, v);
+            W approx1 = incrementalOracle.distance_to_color(u, v);
             W approx2 = fullOracle.distance_to_color(u, v);
-         //   getDistances(pg, v, dist);
-            if (approx1 > approx2 * (1 + eps)) {
+            getDistances(pg, v, dist);
+            W exact = dist[u];
+            if (approx1 > exact * (1 + eps)) {
                 printf("%d - %d\n", u, v);
-                assert(approx1 > approx2 * (1 + eps));
+                assert(approx1 > exact * (1 + eps));
             }
-            if (approx2 > approx1 * (1 + eps)) {
+            if (exact > approx1) {
                 printf("%d - %d\n", u, v); 
-                assert(approx2 > approx1 * (1 + eps));
+                assert(exact > approx1);
             }
-            printf("%d\n", tt);
+            if (approx2 > exact * (1 + eps)) {
+                printf("%d - %d\n", u, v);
+                assert(approx2 > exact * (1 + eps));
+            }
+            if (exact > approx2) {
+                printf("%d - %d\n", u, v); 
+                assert(exact > approx2);
+            }
+            printf("%d: %lf %lf %lf\n", tt, exact, approx1, approx2);
         }
 
         clock_t end = clock();
