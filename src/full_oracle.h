@@ -68,7 +68,7 @@ class FullPlanarOracle : public PlanarOracle {
             if (L.empty()) return infinity;
             int a = 0, b = L.size(), c;
             while (b-a>1) {
-                c = a+b/2;
+                c = (a+b)/2;
                 if (L[c].first <= p) {
                     a = c;
                 } else {
@@ -119,6 +119,7 @@ public:
             const vector< W >& weights,
             W eps) : labels(n), forest(n) {
         initialize(n, edges, weights, eps);
+        for (int v=0; v<n; ++v) forest.update(v);
     }
 
     int merge(int l1, int l2, int u, int v);

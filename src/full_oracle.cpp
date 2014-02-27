@@ -91,7 +91,7 @@ W FullPlanarOracle::distance_to_color(int v, int l) {
     W res = infinity;
     for (auto it: vertices[v].to_portal) {
         int p = it.first;
-        W dist = forest.vertex_tree_value(v).getDistance(p);
+        W dist = forest.tree_value(l).getDistance(p);
         res = min(res, it.second + dist);
     }
     for (auto it: vertices[v].direct_pieces) {

@@ -24,11 +24,21 @@ const int n = 100;
 const int m = 100;
 const W eps = 0.5;
 
-const int t = 100;
+const int t = 1000;
+
+clock_t begint, endt;
+void start_timer() {
+    begint = clock();
+}
+
+void stop_timer() {
+    endt = clock();
+    printf("- %lf s\n", double(endt-begint) / CLOCKS_PER_SEC);
+}
 
 int main() {
 //    for (int n = 1; n < 100; ++n)
-    int n = 30;
+    int n = 100;
     {
         printf("%d\n", n);
         vector< pair< int, int > > edge;
@@ -45,15 +55,42 @@ int main() {
                 weight.push_back(rand()%m+1);
             }
 
+        start_timer();
         IncrementalPlanarOracle incrementalOracle(n*n, edge, weight, eps);
+        stop_timer();
+        start_timer();
         FullPlanarOracle fullOracle(n*n, edge, weight, eps);
+        stop_timer();
 
         PlanarGraph pg(n*n);
         for (int i=0; i<(int)edge.size(); ++i) pg.add_edge(edge[i].first, edge[i].second, weight[i]);
         vector<W> dist;
 
-        clock_t begin = clock();
+        start_timer();
+        for (int tt=0; tt<t; ++tt) {
+            int u = rand()%(n*n), v = rand()%(n*n);
+            if (u == v) continue;
+            W approx1 = incrementalOracle.distance_to_color(u, v);
+        }
+        stop_timer();
 
+        start_timer();
+        for (int tt=0; tt<t; ++tt) {
+            int u = rand()%(n*n), v = rand()%(n*n);
+            if (u == v) continue;
+            W approx2 = fullOracle.distance_to_color(u, v);
+        }
+        stop_timer();
+
+        start_timer();
+        for (int tt=0; tt<t; ++tt) {
+            int u = rand()%(n*n), v = rand()%(n*n);
+            if (u == v) continue;
+            getDistances(pg, v, dist);
+            W exact = dist[u];
+        }
+        stop_timer();
+/*
         for (int tt=0; tt<t; ++tt) {
             int u = rand()%(n*n), v = rand()%(n*n);
             if (u == v) continue;
@@ -61,28 +98,14 @@ int main() {
             W approx2 = fullOracle.distance_to_color(u, v);
             getDistances(pg, v, dist);
             W exact = dist[u];
-            if (approx1 > exact * (1 + eps)) {
-                printf("%d - %d\n", u, v);
-                assert(approx1 > exact * (1 + eps));
-            }
-            if (exact > approx1) {
-                printf("%d - %d\n", u, v); 
-                assert(exact > approx1);
-            }
-            if (approx2 > exact * (1 + eps)) {
-                printf("%d - %d\n", u, v);
-                assert(approx2 > exact * (1 + eps));
-            }
-            if (exact > approx2) {
-                printf("%d - %d\n", u, v); 
-                assert(exact > approx2);
-            }
             printf("%d: %lf %lf %lf\n", tt, exact, approx1, approx2);
+            
+            assert(approx1 <= exact * (1 + eps));
+            assert(exact <= approx1);
+            assert(approx2 <= exact * (1 + eps));
+            assert(exact <= approx2);
         }
-
-        clock_t end = clock();
-
-        printf("%lf s\n", double(end-begin) / CLOCKS_PER_SEC);
+*/
     }
     return 0;
 }

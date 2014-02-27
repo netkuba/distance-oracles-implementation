@@ -104,7 +104,7 @@ PlanarOracle::initialize(
                 pair<int, int> prevV(-1, -1);
                 W dist = 0;
                 for (auto v: tmpPaths[j]) {
-                    if (dist > alpha*eps/2) {
+                    if (dist > alpha*eps/4) {
                         newPortals.push_back(prevV.first);
                         dist = pg.es()[prevV.second].w;
                     }
@@ -117,7 +117,7 @@ PlanarOracle::initialize(
             auto it = unique(newPortals.begin(), newPortals.end());
             newPortals.resize(std::distance(newPortals.begin(), it));
 
-            assert(newPortals.size() <= 3 * 3 * (int)(1/eps + 1) * 2);
+            assert(newPortals.size() <= 3 * 3 * (int)(1/eps + 1) * 4);
 
             processPortals(i, pg, mapping, newPortals, sources[i]);
         }

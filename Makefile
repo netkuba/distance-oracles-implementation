@@ -1,6 +1,6 @@
 ALL= test rotate planar_test oracle.o
-#CXXFLAGS= -std=c++11 -O3
-CXXFLAGS= -std=c++11 -Wall -ggdb
+CXXFLAGS= -std=c++11 -O3
+#CXXFLAGS= -std=c++11 -Wall -ggdb
 
 all: $(ALL)
 

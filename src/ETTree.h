@@ -107,6 +107,14 @@ public:
             return it;
         }
         
+        void update_value() {
+            if (iterNum == 0) {
+                merger.merge_none(&value);
+            } else {
+                merger.merge_none(NULL);
+                trueIter.update();
+            }
+        }
     };
    
     map< pair<int, int>, Iter > edgeMap;
@@ -123,34 +131,25 @@ public:
 
     //! Returns a reference to a value of vertex ET-tree root
     _Merger& vertex_tree_value(int u) {
-        if (values[u].iterNum) {
-            return (*values[u].trueIter.get_root()).merger;
-        } else {
-            return values[u].merger;
-        }
+        if (values[u].iterNum == 0) return values[u].merger;
+        return (*values[u].trueIter.get_root()).merger;
     }
 
     int vertex_tree_number(int u) {
-        if (values[u].iterNum) {
-            return (*values[u].trueIter.get_root()).treeNum;
-        } else {
-            return u;
-        }
+        if (values[u].iterNum == 0)  return u;
+        return (*values[u].trueIter.get_root()).treeNum;
     }
 
     //! Returns a reference to a value of ET-tree root
-    const _Merger& tree_value(int a)
-        { return (*trees[a].get_root()).ptr->merger; }
+    const _Merger& tree_value(int a) { 
+        if (trees[a].empty()) return values[a].merger;
+        return (*trees[a].get_root()).ptr->merger;
+    }
 
     //! Updates the structure after modification of a value
-    void update(int u)
-        { 
-            if (values[u].iterNum) {
-                values[u].trueIter.update(); 
-            } else {
-                values[u].merger.merge_none(&values[u].value);
-            }
-        }
+    void update(int u) { 
+        values[u].update_value();
+    }
 
     int merge(int a, int b, int u, int v) {
         if (values[u].iterNum) {
