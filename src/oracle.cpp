@@ -102,15 +102,28 @@ PlanarOracle::initialize(
 
             for (int j=0; j<(int)tmpPaths.size(); ++j) {
                 pair<int, int> prevV(-1, -1);
-                W dist = inf;
+                W dist = infinity;
+                for (int k=0; k<(int)tmpPaths[j].size()-1; ++k) {
+                    int v = tmpPaths[j][k].first;
+                    W w = pg.es()[tmpPaths[j][k].second].w;
+
+                    if (dist + w > alpha*eps/2) {
+                        newPortals.push_back(v);
+                        dist = 0;
+                    }
+
+                    dist += w;
+                }
+                /*
                 for (auto v: tmpPaths[j]) {
-                    if (dist >= alpha*eps/4) {
+                    if (dist > alpha*eps/4) {
                         newPortals.push_back(prevV.first);
                         dist = pg.es()[prevV.second].w;
                     }
                     dist += pg.es()[v.second].w;
                     prevV = v;
                 }
+                */
             }
 
             sort(newPortals.begin(), newPortals.end());
