@@ -1,3 +1,5 @@
+#include "api_tester.cpp"
+
 #include "planar.h"
 #include "incremental_oracle.h"
 #include "full_oracle.h"
@@ -24,7 +26,7 @@ const int n = 100;
 const int m = 100;
 const W eps = 0.5;
 
-const int t = 1000;
+const int t = 10000;
 
 clock_t begint, endt;
 void start_timer() {
@@ -37,8 +39,12 @@ void stop_timer() {
 }
 
 int main() {
+
+    IncrementalAPITester<IncrementalPlanarOracle> tester(30, 1000, 0.5);
+    tester.runSimpleTest();
+
 //    for (int n = 1; n < 100; ++n)
-    int n = 100;
+/*    int n = 100;
     {
         printf("%d\n", n);
         vector< pair< int, int > > edge;
@@ -90,6 +96,7 @@ int main() {
             W exact = dist[u];
         }
         stop_timer();
+*/
 /*
         for (int tt=0; tt<t; ++tt) {
             int u = rand()%(n*n), v = rand()%(n*n);
@@ -105,7 +112,7 @@ int main() {
             assert(approx2 <= exact * (1 + eps));
             assert(exact <= approx2);
         }
-*/
     }
+*/
     return 0;
 }

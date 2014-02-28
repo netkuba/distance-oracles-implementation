@@ -10,6 +10,14 @@ class IncrementalPlanarOracle : public PlanarOracle {
         vector< pair<int, int> > L; // pair (v, p)
     };
 
+    struct Portal {
+        int p, v;
+        unordered_map<int, W> N;
+        set< pair<W, int> > H;
+        
+        Portal(int pp, int vv) : p(pp), v(vv) {}
+    };
+
     struct FindUnion {
         vector<int> p;
         
@@ -54,9 +62,11 @@ class IncrementalPlanarOracle : public PlanarOracle {
             const vector<bool>& source);
     
     vector< Label > labels;
+    vector< Portal > portals;
     FindUnion fu;
 
 public:
+    IncrementalPlanarOracle() : fu(0) {}
     IncrementalPlanarOracle(
             int n,
             const vector< pair< int, int > >& edges, 

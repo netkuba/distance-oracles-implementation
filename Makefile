@@ -1,6 +1,6 @@
 ALL= test rotate planar_test oracle.o
-CXXFLAGS= -std=c++11 -O3
-#CXXFLAGS= -std=c++11 -Wall -ggdb
+#CXXFLAGS= -std=c++11 -O3
+CXXFLAGS= -std=c++11 -Wall -ggdb
 
 all: $(ALL)
 
@@ -27,7 +27,7 @@ incremental_oracle.o: src/incremental_oracle.cpp src/incremental_oracle.h src/or
 full_oracle.o: src/full_oracle.cpp src/full_oracle.h src/oracle.h src/oracle_internal.h
 	g++ src/full_oracle.cpp -c $(CXXFLAGS)
 
-planar_test: src/planar_test.cpp planar.o oracle_internal.o oracle.o incremental_oracle.o full_oracle.o
+planar_test: src/planar_test.cpp planar.o oracle_internal.o oracle.o incremental_oracle.o full_oracle.o src/api_tester.cpp
 	g++ src/planar_test.cpp planar.o oracle_internal.o oracle.o incremental_oracle.o full_oracle.o -o planar_test $(CXXFLAGS)
  
 graph.o: src/graph.cpp src/graph.h

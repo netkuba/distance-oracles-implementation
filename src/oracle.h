@@ -5,9 +5,11 @@
 #include "oracle_internal.h"
 
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <cmath>
 using std::map;
+using std::unordered_map;
 using std::set;
 using std::min;
 using std::max;
@@ -25,14 +27,6 @@ protected:
         Piece(const PlanarGraph& gg, 
                 const vector<int>& mm) :
             graph(gg), mapping(mm) {}
-    };
-
-    struct Portal {
-        int p, v;
-        map<int, W> N;
-        set< pair<W, int> > H;
-        
-        Portal(int pp, int vv) : p(pp), v(vv) {}
     };
 
     struct Vertex {
@@ -69,7 +63,6 @@ protected:
 
     PlanarGraph graph;
     vector< Piece > pieces;
-    vector< Portal > portals;
     vector< Vertex > vertices;
 
 public:

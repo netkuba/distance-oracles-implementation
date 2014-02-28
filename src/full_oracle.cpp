@@ -28,7 +28,6 @@ void FullPlanarOracle::processPortals(
             if (mapping[j] == -1) continue;
             int v = mapping[j];
 
-            portals.back().N[v] = distances[j];
             if (source[j]) {
                 vertices[v].to_portal[portals.size()-1] = distances[j];
             }

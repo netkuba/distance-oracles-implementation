@@ -79,6 +79,13 @@ class FullPlanarOracle : public PlanarOracle {
             return infinity;
         }
     };
+
+    struct Portal {
+        int p, v;
+        set< pair<W, int> > H;
+        
+        Portal(int pp, int vv) : p(pp), v(vv) {}
+    };
     
     struct Label {
         bool active = false;
@@ -110,6 +117,7 @@ class FullPlanarOracle : public PlanarOracle {
             const vector<bool>& source);
     
     vector< Label > labels;
+    vector< Portal > portals;
     ETForest<ETValue, ETMerger> forest;
 
 public:
