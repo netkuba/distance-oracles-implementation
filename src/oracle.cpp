@@ -69,7 +69,7 @@ PlanarOracle::initialize(
             vector<int> mapping = pieces[i].mapping;
             alpha = preAlpha[i];
 
-            if (pg.vs().size() <= ro) {
+            if ((int)pg.vs().size() <= ro) {
                 processLeaf(i, pg, mapping, sources[i]);
                 continue;
             }

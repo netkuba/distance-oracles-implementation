@@ -58,13 +58,16 @@ private:
 
     void merge(int l1, int l2, int l) {
         int k1 = mapping[l1], k2 = mapping[l2];
-        bool a = active[k1];
+        bool a1 = active[k1], a2 = active[k2];
+        
+        assert(a1 == a2);
+
         int k = fu.unionn(k1, k2);
         mapping[l] = k;
-        active[k] = a;
+        active[k] = a1;
 
         printf("merge: %d + %d -> %d    (%d + %d -> %d)\n", l1, l2, l, k1, k2, k);
-        if (a) {
+        if (a1) {
             aset.erase(l1);
             aset.erase(l2);
             aset.insert(l);
@@ -79,8 +82,8 @@ private:
         printf("activate: %d   (%d)\n", l, mapping[l]);
         int k = mapping[l];
         active[k] = true;
-        naset.erase(k);
-        aset.insert(k);
+        naset.erase(l);
+        aset.insert(l);
 
     }
 

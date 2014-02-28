@@ -1,5 +1,6 @@
 #include "incremental_oracle.h"
 
+#include <signal.h>
 #include <utility>
 using std::min;
 using std::max;
@@ -54,11 +55,13 @@ int IncrementalPlanarOracle::merge(int v, int u) {
         for (auto l: labels[u].L) {
             int p = l.second;
 
-            W du = portals[p].N[u];
-            portals[p].N.erase(u);
+            auto it = portals[p].N.find(u);
+            if (it == portals[p].N.end()) continue;
+            W du = it->second;
+            portals[p].N.erase(it);
             portals[p].H.erase(make_pair(du, u));
 
-            auto it = portals[p].N.find(v);
+            it = portals[p].N.find(v);
             if (it != portals[p].N.end()) {
                 W dv = it->second;
                 du = min(du, dv);
@@ -71,11 +74,12 @@ int IncrementalPlanarOracle::merge(int v, int u) {
     } else {
         for (auto l: labels[u].L) {
             int p = l.second;
+            auto it = portals[p].N.find(u);
+            if (it == portals[p].N.end()) continue;
+            W du = it->second;;
+            portals[p].N.erase(it);
 
-            W du = portals[p].N[u];
-            portals[p].N.erase(u);
-
-            auto it = portals[p].N.find(v);
+            it = portals[p].N.find(v);
             if (it != portals[p].N.end()) {
                 W dv = it->second;
                 du = min(du, dv);

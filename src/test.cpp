@@ -221,7 +221,7 @@ int main() {
             if (forest.vertex_tree_number(i) == i) {
                 cout << i << ": ";
                 vector<int> *list = &forest.vertex_tree_value(i).list;
-                for (int j=0; j<list->size(); ++j) {
+                for (int j=0; j<(int)list->size(); ++j) {
                     cout << (*list)[j] << " ";
                 }
                 cout << endl;
