@@ -57,8 +57,8 @@ private:
     }
 
     void merge(int l1, int l2, int l) {
-        bool a = active[l1];
         int k1 = mapping[l1], k2 = mapping[l2];
+        bool a = active[k1];
         int k = fu.unionn(k1, k2);
         mapping[l] = k;
         active[k] = a;

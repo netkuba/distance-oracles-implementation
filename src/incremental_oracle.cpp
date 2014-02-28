@@ -35,7 +35,7 @@ void IncrementalPlanarOracle::processPortals(
             if (source[j]) {
                 vertices[v].to_portal[portals.size()-1] = distances[j];
             }
-            labels[v].L.push_back(make_pair(v, i));
+            labels[v].L.push_back(make_pair(v, portals.size()-1));
         }
     }
 }
@@ -61,15 +61,31 @@ int IncrementalPlanarOracle::merge(int v, int u) {
             auto it = portals[p].N.find(v);
             if (it != portals[p].N.end()) {
                 W dv = it->second;
-                W du = min(du, dv);
+                du = min(du, dv);
                 portals[p].H.erase(make_pair(dv, v));
             }
 
             portals[p].N[v] = du;
             portals[p].H.insert(make_pair(du, v));
         }
+    } else {
+        for (auto l: labels[u].L) {
+            int p = l.second;
+
+            W du = portals[p].N[u];
+            portals[p].N.erase(u);
+
+            auto it = portals[p].N.find(v);
+            if (it != portals[p].N.end()) {
+                W dv = it->second;
+                du = min(du, dv);
+            }
+
+            portals[p].N[v] = du;
+        }
     }
 
+    for (auto &l: labels[u].L) l.first = v;
     labels[v].L.insert(labels[v].L.end(), labels[u].L.begin(), labels[u].L.end());
     labels[u].L.clear();
 
