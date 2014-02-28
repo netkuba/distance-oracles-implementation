@@ -26,10 +26,12 @@ PlanarOracle::initialize(
         vector<W> distance;
         getDistances(graph, 0, distance);
         for (int i=1; i<(int)distance.size(); ++i) {
-            minD = min(minD, distance[i]);
             maxD = max(maxD, distance[i]);
         }
         maxD *= 2;
+        for (int i=0; i<(int)graph.es().size(); ++i) {
+            minD = min(minD, graph.es()[i].w);
+        }
     }
 
     vector< W > preAlpha;
@@ -38,6 +40,7 @@ PlanarOracle::initialize(
         vector< vector<int> > parents;
         vector< vector<bool> > sources;
         W alpha = minD;
+
         while (alpha <= maxD) {
             vector< vector<int> > tmpParents, tmpMappings;
             vector< vector<bool> > tmpSources;

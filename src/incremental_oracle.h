@@ -63,9 +63,11 @@ class IncrementalPlanarOracle : public PlanarOracle {
     
     vector< Label > labels;
     vector< Portal > portals;
+public:
     FindUnion fu;
 
-public:
+    bool issActive(int v) { return isActive(v); }
+
     IncrementalPlanarOracle() : fu(0) {}
     IncrementalPlanarOracle(
             int n,

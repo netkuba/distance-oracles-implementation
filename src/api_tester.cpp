@@ -115,6 +115,21 @@ private:
         return res;
     }
 
+    int closest(int v) {
+        vector<W> dist;
+        getDistances(pg, v, dist);
+        
+        int last = -1;
+        W res = infinity;
+        for (int u=0; u<nn; ++u) {
+            if (active[fu.find(u)]) {
+                res = min(res, dist[u]);
+                if (res == dist[u]) last = u;
+            }
+        }
+        return last;
+    }
+
     void randomDistanceQuery() {
         int v = rand()%nn, l;
         int x = rand()%(aset.size() + naset.size());
@@ -142,9 +157,6 @@ private:
         W approx = oracle.distance_to_closest(v);
 
         assert(exact <= approx);
-        if (approx > exact * (1 + eeps)) {
-            printf("%d - %lf %lf\n", v, exact, approx);
-        }
         assert(approx <= exact * (1 + eeps));
     }
 
@@ -197,6 +209,8 @@ public:
     void runSimpleTest() {
         for (int i=0; i<nn; ++i) {
 
+            printf("i: %d\n", i);
+
             randomMergeQuery();
             if (rand()%(aset.size() + naset.size()) < naset.size()) {
                 randomActivateQuery();
@@ -206,15 +220,7 @@ public:
                 randomDistanceQuery();
                 randomClosestQuery();
             }
-/*        
-            W exact = distance_to_closest(7843);
-            W approx = oracle.distance_to_closest(7843);
 
-            if (approx > exact * (1 + eeps)) {
-                printf("%d - %lf %lf\n", 7843, exact, approx);
-                exit(1);
-            }
-            */
         }
     }
 };
