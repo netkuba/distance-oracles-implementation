@@ -12,8 +12,10 @@ void IncrementalPlanarOracle::processLeaf(
         const PlanarGraph& pg,
         const vector<int>& mapping,
         const vector<bool>& source) {
+    
     for (int v=0; v<(int)pg.vs().size(); ++v) {
         if (!source[v]) continue;
+        if (mapping[v] == -1) continue;
         vertices[mapping[v]].direct_pieces.push_back(i);
     }
 }
@@ -23,7 +25,8 @@ void IncrementalPlanarOracle::processPortals(
         const PlanarGraph& pg,
         const vector<int>& mapping,
         const vector<int>& newPortals,
-        const vector<bool>& source) {    
+        const vector<bool>& source) {
+
     vector<W> distances;
     for (int p: newPortals) {
         getDistances(pg, p, distances);
@@ -98,6 +101,8 @@ int IncrementalPlanarOracle::merge(int v, int u) {
 }
 
 W IncrementalPlanarOracle::distance_to_color(int v, int u) {
+    if (isOfColor(v, u)) return 0;
+
     W res = infinity;
     for (auto it: vertices[v].to_portal) {
         int p = it.first;
@@ -123,6 +128,8 @@ W IncrementalPlanarOracle::distance_to_color(int v, int u) {
 }
 
 W IncrementalPlanarOracle::distance_to_closest(int v) {
+    if (isActive(v)) return 0;
+
     W res = infinity;
     for (auto it: vertices[v].to_portal) {
         int p = it.first;

@@ -40,9 +40,9 @@ PlanarOracle::initialize(
         W alpha = minD;
         while (alpha <= maxD) {
             vector< vector<int> > tmpParents, tmpMappings;
-            vector< vector<bool> > tmpFocus;
+            vector< vector<bool> > tmpSources;
             vector< PlanarGraph > tmpSubgs;
-            getAlphaFamily(graph, alpha, tmpSubgs, tmpMappings, tmpParents, tmpFocus);
+            getAlphaFamily(graph, alpha, tmpSubgs, tmpMappings, tmpParents, tmpSources);
 
             for (int i=0; i<(int)tmpSubgs.size(); ++i) {
 
@@ -53,7 +53,7 @@ PlanarOracle::initialize(
                 pieces.push_back(Piece(
                             tmpSubgs[i], tmpMappings[i]));
                 parents.push_back(tmpParents[i]);
-                sources.push_back(tmpFocus[i]);
+                sources.push_back(tmpSources[i]);
                 preAlpha.push_back(alpha);
             }
 
@@ -83,18 +83,18 @@ PlanarOracle::initialize(
                     tmpParents, tmpPaths);
             
             for (int j=0; j<(int)tmpSubgs.size(); ++j) {
-                vector<bool> tmpFocus;
+                vector<bool> tmpSources;
                 for (int k=0; k<(int)tmpMappings[j].size(); ++k) {
                     if (tmpMappings[j][k] == -1) {
-                        tmpFocus.push_back(false);
+                        tmpSources.push_back(false);
                         continue;
                     }
-                    tmpFocus.push_back(sources[i][tmpMappings[j][k]]);
+                    tmpSources.push_back(sources[i][tmpMappings[j][k]]);
                     tmpMappings[j][k] = mapping[tmpMappings[j][k]];
                 }
                 pieces.push_back(Piece(tmpSubgs[j], tmpMappings[j]));
                 parents.push_back(tmpParents[j]);
-                sources.push_back(tmpFocus);
+                sources.push_back(tmpSources);
                 preAlpha.push_back(alpha);
             }
 
@@ -102,9 +102,9 @@ PlanarOracle::initialize(
 
             for (int j=0; j<(int)tmpPaths.size(); ++j) {
                 pair<int, int> prevV(-1, -1);
-                W dist = 0;
+                W dist = inf;
                 for (auto v: tmpPaths[j]) {
-                    if (dist > alpha*eps/4) {
+                    if (dist >= alpha*eps/4) {
                         newPortals.push_back(prevV.first);
                         dist = pg.es()[prevV.second].w;
                     }

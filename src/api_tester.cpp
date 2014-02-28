@@ -1,5 +1,6 @@
 #include "FindUnion.h"
 #include "oracle_internal.h"
+#include <signal.h>
 #include <map>
 #include <set>
 
@@ -141,6 +142,9 @@ private:
         W approx = oracle.distance_to_closest(v);
 
         assert(exact <= approx);
+        if (approx > exact * (1 + eeps)) {
+            printf("%d - %lf %lf\n", v, exact, approx);
+        }
         assert(approx <= exact * (1 + eeps));
     }
 
@@ -202,6 +206,15 @@ public:
                 randomDistanceQuery();
                 randomClosestQuery();
             }
+/*        
+            W exact = distance_to_closest(7843);
+            W approx = oracle.distance_to_closest(7843);
+
+            if (approx > exact * (1 + eeps)) {
+                printf("%d - %lf %lf\n", 7843, exact, approx);
+                exit(1);
+            }
+            */
         }
     }
 };
