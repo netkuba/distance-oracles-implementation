@@ -74,7 +74,7 @@ public:
         Iter trueIter;
         set<Iter> falseIters;
 
-        ValueBox() : iterNum(0) {}
+        ValueBox() : value(), merger(), iterNum(0), trueIter(), falseIters() {}
         
         void remove_iter(const Iter& it) {
             if (trueIter == it) {
@@ -123,7 +123,7 @@ public:
 
 public:
     //! Construct a forest of n ET-trees
-    ETForest(int n) : values(n), trees(n) {}
+    ETForest(int n) : edgeMap(), values(n), trees(n) {}
 
     //! Returns a reference to a value of vertex
     _Value& vertex_value(int u) 

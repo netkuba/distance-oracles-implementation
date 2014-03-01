@@ -47,6 +47,8 @@ PlanarOracle::initialize(
             vector< PlanarGraph > tmpSubgs;
             getAlphaFamily(graph, alpha, tmpSubgs, tmpMappings, tmpParents, tmpSources);
 
+            assert(tmpSources.size() == tmpMappings.size());
+            
             for (int i=0; i<(int)tmpSubgs.size(); ++i) {
 
                 for (int j=1; j<(int)tmpMappings[i].size(); ++j) {

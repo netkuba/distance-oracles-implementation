@@ -40,9 +40,14 @@ void stop_timer() {
 
 int main() {
 
-    IncrementalAPITester<IncrementalPlanarOracle> tester(30, 4000, 0.5);
-    tester.runSimpleTest();
+    IncrementalAPITester<IncrementalPlanarOracle> tester(5, 500, 0.5);
 
+//    tester.runSimpleTest();
+
+/*
+    FullAPITester<FullPlanarOracle> tester(10, 500, 0.5);
+    tester.runSimpleTest();
+*/
 //    for (int n = 1; n < 100; ++n)
 /*    int n = 100;
     {
