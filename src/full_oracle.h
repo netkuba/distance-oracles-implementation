@@ -121,6 +121,8 @@ class FullPlanarOracle : public PlanarOracle {
     ETForest<ETValue, ETMerger> forest;
 
 public:
+
+    FullPlanarOracle() : forest(0) {}
     FullPlanarOracle(
             int n,
             const vector< pair< int, int > >& edges,
