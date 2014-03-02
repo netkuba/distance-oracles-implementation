@@ -15,20 +15,19 @@ class PlanarGraph {
 public:
     struct Edge {
         Edge(int uu, int vv, W ww) : 
-            ind(-1), u(uu), v(vv), w(ww) {}
+            u(uu), v(vv), w(ww), uNext(-1), vNext(-1) {
+                assert(w != 0);    
+        }
         Edge(int uu, int vv) : Edge(uu, vv, infinity) {}
 
-        int ind;
         int u, v;
-        int uNext, vNext;
         W w;
+        int uNext, vNext;
     };
 
     struct Vertex {
-        Vertex() : 
-            ind(-1) {}
+        Vertex() : edges() {}
 
-        int ind;
         vector<int> edges;
     };
 
@@ -80,15 +79,6 @@ public:
     int eNext(int u, int e) const {
         if (es()[e].u == u) return es()[e].uNext;
         return es()[e].vNext;
-    }
-
-    void enumerate() {
-        for (int i=0; i<(int)vs().size(); ++i) {
-            vs()[i].ind = i;
-        }
-        for (int i=0; i<(int)es().size(); ++i) {
-            es()[i].ind = i;
-        }
     }
 };
 
