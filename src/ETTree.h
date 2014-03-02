@@ -125,25 +125,27 @@ public:
     //! Construct a forest of n ET-trees
     ETForest(int n) : edgeMap(), values(n), trees(n) {}
 
-    //! Returns a reference to a value of vertex
+    //! Returns a reference to a value of vertex given a vertex number
     _Value& vertex_value(int u) 
         { return values[u].value; }
 
-    //! Returns a reference to a value of vertex ET-tree root
+    //! Returns a reference to a merger of ET-tree given a vertex number
     _Merger& vertex_tree_value(int u) {
         if (values[u].iterNum == 0) return values[u].merger;
         return (*values[u].trueIter.get_root()).merger;
     }
 
+    //! Returns a number of a tree given a vertex number
     int vertex_tree_number(int u) {
         if (values[u].iterNum == 0)  return u;
         return (*values[u].trueIter.get_root()).treeNum;
     }
 
-    //! Returns a reference to a value of ET-tree root
+    //! Returns a reference to a merger of ET-tree given a tree number
     const _Merger& tree_value(int a) { 
         if (trees[a].empty()) return values[a].merger;
-        return (*trees[a].get_root()).ptr->merger;
+//        return (*trees[a].get_root()).ptr->merger;
+        return trees[a].root->value.merger;
     }
 
     //! Updates the structure after modification of a value

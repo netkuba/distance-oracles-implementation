@@ -544,7 +544,7 @@ private:
     typedef AVLTreeNode<_Value>* NodePtr;
     //! Value of the iterator
     NodePtr ptr;
-    AVLTreeIterator(const NodePtr &pptr) : ptr(pptr) {}
+    AVLTreeIterator(NodePtr pptr) : ptr(pptr) {}
 public:
     AVLTreeIterator(const AVLTreeIterator &it) : ptr(it.ptr) {}
     AVLTreeIterator() : ptr(NULL) {}
@@ -595,12 +595,12 @@ public:
 template <typename _Value>
 class AVLTree {
 private:
+public:
     //! Pointer to a node
     typedef AVLTreeNode<_Value>* NodePtr;
     //! Root of the tree
     NodePtr root;
 
-public:
     typedef AVLTreeIterator<_Value> iterator;
     
     AVLTree() : root(NULL) {}

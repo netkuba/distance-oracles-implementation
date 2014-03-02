@@ -125,6 +125,7 @@ W FullPlanarOracle::distance_to_closest(int v) {
         vector<W> distances;
         getDistances(pieces[it].graph, s, distances);
         for (int i=0; i<(int)mapping.size(); ++i) {
+            if (mapping[i] == -1) continue;
             if (isActive(mapping[i])) {
                 res = min(res, distances[i]);
             }
