@@ -58,8 +58,8 @@ void FullPlanarOracle::deactivate(int l) {
 }
 
 int FullPlanarOracle::merge(int l1, int l2, int u, int v) {
-    bool active = labels[v].active;
-    assert(labels[u].active == active);
+    bool active = labels[l1].active;
+    assert(labels[l2].active == active);
 
     if (active) {
         deactivate(l1);

@@ -20,7 +20,6 @@ void FullPlanarOracle::processPortals(
         const vector<int>& mapping,
         const vector<int>& newPortals,
         const vector<bool>& source) {
-    
     vector<W> distances;
     for (int p: newPortals) {
         getDistances(pg, p, distances);
@@ -29,7 +28,6 @@ void FullPlanarOracle::processPortals(
             if (mapping[j] == -1) continue;
             int v = mapping[j];
 
-            portals.back().N[v] = distances[j];
             if (source[j]) {
                 vertices[v].to_portal[portals.size()-1] = distances[j];
             }
@@ -60,8 +58,8 @@ void FullPlanarOracle::deactivate(int l) {
 }
 
 int FullPlanarOracle::merge(int l1, int l2, int u, int v) {
-    bool active = labels[v].active;
-    assert(labels[u].active == active);
+    bool active = labels[l1].active;
+    assert(labels[l2].active == active);
 
     if (active) {
         deactivate(l1);
@@ -92,7 +90,8 @@ W FullPlanarOracle::distance_to_color(int v, int l) {
     W res = infinity;
     for (auto it: vertices[v].to_portal) {
         int p = it.first;
-        W dist = forest.vertex_tree_value(v).getDistance(p);
+        printf("%lx out!\n", (long unsigned int)&forest.tree_value(l));
+        W dist = forest.tree_value(l).getDistance(p);
         res = min(res, it.second + dist);
     }
     for (auto it: vertices[v].direct_pieces) {
@@ -103,6 +102,7 @@ W FullPlanarOracle::distance_to_color(int v, int l) {
         vector<W> distances;
         getDistances(pieces[it].graph, s, distances);
         for (int i=0; i<(int)mapping.size(); ++i) {
+            if (mapping[i] == -1) continue;
             if (isOfColor(mapping[i], l)) {
                 res = min(res, distances[i]);
             }
@@ -126,6 +126,7 @@ W FullPlanarOracle::distance_to_closest(int v) {
         vector<W> distances;
         getDistances(pieces[it].graph, s, distances);
         for (int i=0; i<(int)mapping.size(); ++i) {
+            if (mapping[i] == -1) continue;
             if (isActive(mapping[i])) {
                 res = min(res, distances[i]);
             }

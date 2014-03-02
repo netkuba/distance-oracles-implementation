@@ -144,8 +144,7 @@ public:
     //! Returns a reference to a merger of ET-tree given a tree number
     const _Merger& tree_value(int a) { 
         if (trees[a].empty()) return values[a].merger;
-//        return (*trees[a].get_root()).ptr->merger;
-        return trees[a].root->value.merger;
+        return (*trees[a].get_root()).merger;
     }
 
     //! Updates the structure after modification of a value
